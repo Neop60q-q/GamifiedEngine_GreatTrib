@@ -29,21 +29,15 @@ export function PortalPage({
                         Student
                     </Link>
                     <Link
-                        href="/educator"
+                        href="/management"
                         className="rounded border border-gray-400 bg-white px-3 py-2 hover:bg-gray-50"
                     >
-                        Educator
-                    </Link>
-                    <Link
-                        href="/employer"
-                        className="rounded border border-gray-400 bg-white px-3 py-2 hover:bg-gray-50"
-                    >
-                        Employer
+                        Management
                     </Link>
                 </nav>
                 <header className="mb-6 rounded border border-gray-300 bg-white p-6">
                     <p className="mb-2 text-sm font-bold text-blue-700">
-                        {label} · PROTOTYPE
+                        {label} - PROTOTYPE
                     </p>
                     <h1 className="text-3xl font-bold">{title}</h1>
                     <p className="mt-3 max-w-3xl text-gray-600">
@@ -52,7 +46,7 @@ export function PortalPage({
                 </header>
                 {children}
                 <footer className="py-6 text-center text-sm text-gray-500">
-                    Prototype portal — authentication and real workflows are not
+                    Prototype portal - authentication and real workflows are not
                     connected yet.
                 </footer>
             </div>

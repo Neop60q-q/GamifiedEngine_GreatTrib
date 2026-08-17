@@ -77,21 +77,16 @@ export default function BasicEngine({
                         </p>
                     </header>
 
-                    <section className="mb-6 grid gap-4 sm:grid-cols-3">
+                    <section className="mb-6 grid gap-4 sm:grid-cols-2">
                         <InfoBox
                             title="Student portal"
                             text="Shows XP, level, progress and unlocked opportunities."
                             href="/student"
                         />
                         <InfoBox
-                            title="Educator portal"
-                            text="Approves learning activities and awards configured XP."
-                            href="/educator"
-                        />
-                        <InfoBox
-                            title="Employer portal"
-                            text="Approves gigs and challenges and awards configured XP."
-                            href="/employer"
+                            title="Educator and employer portal"
+                            text="A shared management portal with separate educator and employer identities."
+                            href="/management"
                         />
                     </section>
 
