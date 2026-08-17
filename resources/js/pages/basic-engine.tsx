@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 
 type Definition = {
@@ -81,14 +81,17 @@ export default function BasicEngine({
                         <InfoBox
                             title="Student portal"
                             text="Shows XP, level, progress and unlocked opportunities."
+                            href="/student"
                         />
                         <InfoBox
                             title="Educator portal"
                             text="Approves learning activities and awards configured XP."
+                            href="/educator"
                         />
                         <InfoBox
                             title="Employer portal"
                             text="Approves gigs and challenges and awards configured XP."
+                            href="/employer"
                         />
                     </section>
 
@@ -261,11 +264,25 @@ export default function BasicEngine({
     );
 }
 
-function InfoBox({ title, text }: { title: string; text: string }) {
+function InfoBox({
+    title,
+    text,
+    href,
+}: {
+    title: string;
+    text: string;
+    href: string;
+}) {
     return (
         <div className="rounded border border-gray-300 bg-white p-5">
             <h2 className="font-bold">{title}</h2>
             <p className="mt-2 text-sm text-gray-600">{text}</p>
+            <Link
+                href={href}
+                className="mt-4 inline-block rounded border border-gray-400 px-3 py-2 text-sm font-bold hover:bg-gray-100"
+            >
+                Open portal →
+            </Link>
         </div>
     );
 }
