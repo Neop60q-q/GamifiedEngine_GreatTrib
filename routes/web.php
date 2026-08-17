@@ -5,7 +5,7 @@ use App\Models\XpLevel;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('engine', [
+Route::get('/', fn () => Inertia::render('basic-engine', [
     'definitions' => XpDefinition::query()->where('active', true)->orderBy('type')->get(),
     'levels' => XpLevel::query()->orderBy('level')->get(),
 ]))->name('home');
