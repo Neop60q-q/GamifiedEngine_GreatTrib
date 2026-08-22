@@ -20,7 +20,6 @@ type Draft = {
     xp: number;
     role: Role;
     actorId: string;
-    verification: string;
 };
 
 const templates = [
@@ -46,7 +45,6 @@ export default function ManagementPortal({
         initialRole === 'educator' ? 'activity' : 'challenge',
     );
     const [xp, setXp] = useState(100);
-    const [verification, setVerification] = useState<Role>(initialRole);
     const [drafts, setDrafts] = useState<Draft[]>([]);
 
     const changeRole = (nextRole: Role) => {
@@ -55,7 +53,6 @@ export default function ManagementPortal({
             nextRole === 'educator' ? 'educator-demo-001' : 'employer-demo-001',
         );
         setType(nextRole === 'educator' ? 'activity' : 'challenge');
-        setVerification(nextRole);
     };
 
     const openCreate = () => {
@@ -83,7 +80,6 @@ export default function ManagementPortal({
                 xp,
                 role,
                 actorId: actorId.trim(),
-                verification,
             },
             ...items,
         ]);
@@ -307,35 +303,50 @@ export default function ManagementPortal({
                                         </option>
                                     </select>
                                 </Field>
-                                <Field label="XP value">
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={xp}
-                                        onChange={(event) =>
-                                            setXp(Number(event.target.value))
-                                        }
-                                        className="w-full rounded border border-gray-400 px-3 py-2"
-                                    />
-                                </Field>
-                                <Field label="Verification">
+                                <Field label="Select student">
                                     <select
-                                        value={verification}
-                                        onChange={(event) =>
-                                            setVerification(
-                                                event.target.value as Role,
-                                            )
-                                        }
+                                        defaultValue=""
                                         className="w-full rounded border border-gray-400 px-3 py-2"
                                     >
-                                        <option value="educator">
-                                            Educator approval
+                                        <option value="" disabled>
+                                            Select a student
                                         </option>
-                                        <option value="employer">
-                                            Employer approval
+                                        <option value="student-demo-001">
+                                            Demo Student
                                         </option>
                                     </select>
                                 </Field>
+                                <section className="rounded border border-gray-300 bg-gray-50 p-4">
+                                    <h3 className="font-bold">Reward</h3>
+                                    <p className="mt-1 mb-4 text-sm text-gray-500">
+                                        Set the reward students receive when
+                                        they complete this task.
+                                    </p>
+                                    <Field label="XP value">
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={xp}
+                                            onChange={(event) =>
+                                                setXp(
+                                                    Number(event.target.value),
+                                                )
+                                            }
+                                            className="w-full rounded border border-gray-400 bg-white px-3 py-2"
+                                        />
+                                    </Field>
+                                    <label className="mt-4 flex items-start gap-3 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            className="mt-0.5 size-4 shrink-0 rounded border-gray-400"
+                                        />
+                                        <span>
+                                            Reward
+                                            achievements/accessories/professor_editable_endorsement_badges?
+                                            (to be developed if time permits)
+                                        </span>
+                                    </label>
+                                </section>
                             </div>
 
                             <p className="mt-4 rounded bg-yellow-50 p-3 text-sm text-yellow-900">
