@@ -37,8 +37,8 @@ progress through levels and unlock platform capabilities.
 
 
 ## Team Members
-Huu Tri 
-Isaiah Mcllroy
-Minh Duc Dang
-Thi Hoa Nguyen
-Josh McCall 
+- Huu Tri 
+- Isaiah Mcllroy
+- Minh Duc Dang
+- Thi Hoa Nguyen
+- Josh McCall 
