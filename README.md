@@ -2,6 +2,8 @@
 
 This prototype is based on the supplied Educator/Employer Portal and Student Portal wireframes.
 
+Here is an extra line
+
 ## Architecture
 
 - **Laravel/PHP integration layer**: authentication, Alumable API integration, role/permission checks, portal requests.
