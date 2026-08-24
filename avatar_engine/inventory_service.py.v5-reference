@@ -1,0 +1,47 @@
+"""
+Avatar inventory service - proof-of-concept.
+
+This service does NOT calculate XP.
+The existing XP Engine decides whether a reward condition has been met.
+It then calls this service (or writes the equivalent reward event) to grant
+the cosmetic item to the student's inventory.
+"""
+
+from collections import defaultdict
+
+ITEMS = {
+    1: {"id": 1, "code": "CAREER_BLAZER", "name": "Career Blazer", "slot": "outfit", "asset_key": "outfits/career_blazer"},
+    2: {"id": 2, "code": "CAREER_STAR_PIN", "name": "Career Star Pin", "slot": "badge", "asset_key": "accessories/career_star_pin"},
+    3: {"id": 3, "code": "GOLD_JACKET", "name": "Gold Jacket", "slot": "outfit", "asset_key": "outfits/gold_jacket"},
+}
+
+INVENTORY = defaultdict(set)
+EQUIPPED = defaultdict(dict)
+REWARD_EVENTS = set()
+
+def grant_item(student_id: int, item_id: int, event_id: str):
+    """Idempotent: the same completion/reward event cannot grant twice."""
+    if event_id in REWARD_EVENTS:
+        return {"granted": False, "duplicate": True, "item": ITEMS[item_id]}
+
+    REWARD_EVENTS.add(event_id)
+    INVENTORY[student_id].add(item_id)
+    return {"granted": True, "duplicate": False, "item": ITEMS[item_id]}
+
+def equip_item(student_id: int, item_id: int):
+    if item_id not in INVENTORY[student_id]:
+        raise ValueError("Student does not own this item")
+
+    item = ITEMS[item_id]
+    EQUIPPED[student_id][item["slot"]] = item_id
+    return get_avatar(student_id)
+
+def get_avatar(student_id: int):
+    return {
+        "student_id": student_id,
+        "inventory": [ITEMS[i] for i in sorted(INVENTORY[student_id])],
+        "equipped": {
+            slot: ITEMS[item_id]
+            for slot, item_id in EQUIPPED[student_id].items()
+        },
+    }

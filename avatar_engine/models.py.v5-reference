@@ -1,0 +1,28 @@
+from pydantic import BaseModel
+from typing import Optional, Literal
+
+class CosmeticItem(BaseModel):
+    id: int
+    code: str
+    name: str
+    slot: Literal["outfit", "hat", "glasses", "badge", "accessory"]
+    asset_key: str
+    rarity: str = "Common"
+
+class GrantRewardRequest(BaseModel):
+    student_id: int
+    reward_source_type: Literal["ACTIVITY", "CHALLENGE", "ACHIEVEMENT", "LEVEL"]
+    reward_source_id: int
+    item_id: int
+    event_id: str
+
+class EquipItemRequest(BaseModel):
+    student_id: int
+    item_id: int
+
+class AvatarPosition(BaseModel):
+    student_id: int
+    room_id: str
+    x: float
+    y: float
+    direction: Optional[str] = "down"

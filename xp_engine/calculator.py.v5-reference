@@ -1,0 +1,45 @@
+DIFFICULTY = {'Very Easy': 0, 'Easy': 10, 'Moderate': 25, 'Difficult': 40, 'Expert': 60}
+SKILL = {'None': 0, 'Beginner': 10, 'Intermediate': 20, 'Advanced': 35, 'Professional': 50}
+EFFORT = {'Minimal': 0, 'Low': 10, 'Moderate': 20, 'High': 35, 'Intensive': 50}
+COMPLEXITY = {'Single Step': 0, 'Two-Step': 10, 'Multiple Steps': 20, 'Multi-stage': 40, 'Ongoing': 60}
+IMPACT = {'Low': 0, 'Moderate': 10, 'High': 25, 'Significant': 40, 'Transformational': 60}
+VERIFICATION = {'Automatic': 0, 'Self-Declaration': 5, 'Educator Approval': 15, 'Employer Approval': 20, 'Manual Review': 25}
+COMPLETION = {'Completion': 0, 'Pass/Fail': 5, 'Score Based': 10, 'Attendance': 5, 'Submission': 10, 'Employer Accepted': 15}
+
+
+def _hours(value: float, unit: str) -> float:
+    factors = {'Minutes': 1/60, 'Hours': 1, 'Days': 8, 'Weeks': 40, 'Months': 160}
+    return value * factors.get(unit, 1)
+
+
+def time_xp(value: float, unit: str) -> int:
+    h = _hours(value, unit)
+    if h < 1/6: return 5
+    if h <= .5: return 15
+    if h <= 1: return 30
+    if h <= 3: return 60
+    if h <= 4: return 90
+    if h <= 8: return 120
+    if h <= 40: return 200
+    return 350
+
+
+def calculate_xp(factors: dict, task_type: str = 'ACTIVITY') -> int:
+    xp = 10
+    xp += DIFFICULTY.get(factors['difficulty'], 0)
+    xp += time_xp(factors['estimated_time_value'], factors['estimated_time_unit'])
+    xp += SKILL.get(factors['skill_level'], 0)
+    xp += EFFORT.get(factors['effort'], 0)
+    xp += COMPLEXITY.get(factors['complexity'], 0)
+    xp += IMPACT.get(factors['student_impact'], 0)
+    xp += VERIFICATION.get(factors['verification_method'], 0)
+    xp += COMPLETION.get(factors['completion_type'], 0)
+
+    if factors['repeatability'] in {'Daily', 'Weekly', 'Monthly', 'Unlimited'}:
+        xp = int(xp * 0.75)
+
+    if task_type == 'CHALLENGE':
+        xp = int(xp * 1.10)
+
+    xp = max(5, min(xp, 1000))
+    return int(round(xp / 5.0) * 5)

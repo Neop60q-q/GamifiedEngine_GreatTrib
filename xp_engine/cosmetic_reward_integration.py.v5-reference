@@ -1,0 +1,33 @@
+"""
+Example integration from the existing XP completion flow.
+
+After XP, achievements and level progression have been evaluated,
+the XP Engine can emit cosmetic reward grants.
+"""
+
+def process_cosmetic_rewards(student_id, activity, new_achievements, previous_level, new_level, avatar_client):
+
+    # Activity-specific cosmetic reward
+    if activity.get("id") == 17:
+        avatar_client.grant(
+            student_id=student_id,
+            item_id=1,  # Career Blazer
+            event_id=f"activity:{activity['id']}:student:{student_id}:career-blazer"
+        )
+
+    # Achievement-specific cosmetic reward
+    for achievement in new_achievements:
+        if achievement["code"] == "CAREER_STARTER":
+            avatar_client.grant(
+                student_id=student_id,
+                item_id=2,  # Career Star Pin
+                event_id=f"achievement:{achievement['id']}:student:{student_id}:star-pin"
+            )
+
+    # Level reward
+    if previous_level < 5 <= new_level:
+        avatar_client.grant(
+            student_id=student_id,
+            item_id=3,  # Gold Jacket
+            event_id=f"level:5:student:{student_id}:gold-jacket"
+        )

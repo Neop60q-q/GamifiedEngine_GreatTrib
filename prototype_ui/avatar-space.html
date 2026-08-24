@@ -1,0 +1,711 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Alumable Avatar & Campus Hub POC</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --ink: #17151c;
+      --muted: #726d78;
+      --panel: #fff;
+      --line: #e8e4ec;
+      --purple: #8e45d7;
+      --soft: #f7f3fa;
+    }
+
+    body {
+      background: #f4f1f7;
+      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0
+    }
+
+    .shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 999px;
+      padding: 9px 14px;
+      cursor: pointer
+    }
+
+    .tab.active {
+      background: #17151c;
+      color: #fff
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(30, 20, 40, .05)
+    }
+
+    .avatar-stage {
+      height: 360px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #efe7f7 0 72%, #d8ecd9 72%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .avatar {
+      width: 130px;
+      height: 250px;
+      position: relative;
+      transform-origin: bottom center
+    }
+
+    .head {
+      position: absolute;
+      left: 39px;
+      top: 8px;
+      width: 54px;
+      height: 62px;
+      border-radius: 45% 45% 48% 48%;
+      background: #d99b72;
+      border: 3px solid #2a2430;
+      z-index: 4
+    }
+
+    .hair {
+      position: absolute;
+      left: 34px;
+      top: 0;
+      width: 64px;
+      height: 35px;
+      background: #493629;
+      border: 3px solid #2a2430;
+      border-bottom: none;
+      border-radius: 40px 40px 18px 18px;
+      z-index: 5
+    }
+
+    .eye {
+      position: absolute;
+      top: 29px;
+      width: 5px;
+      height: 5px;
+      background: #222;
+      border-radius: 50%;
+      z-index: 6
+    }
+
+    .eye.l {
+      left: 53px
+    }
+
+    .eye.r {
+      left: 76px
+    }
+
+    .body {
+      position: absolute;
+      left: 30px;
+      top: 68px;
+      width: 72px;
+      height: 90px;
+      border: 3px solid #2a2430;
+      border-radius: 18px 18px 10px 10px;
+      background: #784bb4;
+      z-index: 3
+    }
+
+    .legs:before,
+    .legs:after {
+      content: "";
+      position: absolute;
+      top: 150px;
+      width: 27px;
+      height: 78px;
+      background: #343746;
+      border: 3px solid #2a2430;
+      border-radius: 7px;
+      z-index: 2
+    }
+
+    .legs:before {
+      left: 34px
+    }
+
+    .legs:after {
+      left: 70px
+    }
+
+    .shoe:before,
+    .shoe:after {
+      content: "";
+      position: absolute;
+      top: 220px;
+      width: 34px;
+      height: 16px;
+      background: #fff;
+      border: 3px solid #2a2430;
+      border-radius: 10px 10px 5px 5px;
+      z-index: 3
+    }
+
+    .shoe:before {
+      left: 28px
+    }
+
+    .shoe:after {
+      left: 70px
+    }
+
+    .avatar.blazer .body {
+      background: #262a36
+    }
+
+    .avatar.hoodie .body {
+      background: #6085c4
+    }
+
+    .avatar.gold-jacket .body {
+      background: #e0b13e
+    }
+
+    .avatar .hat,
+    .avatar .glasses,
+    .avatar .badgepin {
+      display: none;
+      position: absolute;
+      z-index: 8
+    }
+
+    .avatar.hat-on .hat {
+      display: block;
+      left: 31px;
+      top: -12px;
+      width: 70px;
+      height: 22px;
+      background: #17151c;
+      border: 3px solid #2a2430;
+      border-radius: 50% 50% 25% 25%
+    }
+
+    .avatar.glasses-on .glasses {
+      display: block;
+      left: 44px;
+      top: 31px;
+      width: 44px;
+      height: 12px;
+      border-top: 4px solid #222;
+      border-left: 4px solid #222;
+      border-right: 4px solid #222
+    }
+
+    .avatar.badge-on .badgepin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      left: 75px;
+      top: 93px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f0ca4c;
+      border: 2px solid #2a2430;
+      font-size: 11px
+    }
+
+    .avatar-name {
+      position: absolute;
+      bottom: 8px;
+      background: rgba(255, 255, 255, .9);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 13px
+    }
+
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin: 18px 0 8px
+    }
+
+    .griditems {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      background: #fff
+    }
+
+    .item.selected {
+      outline: 2px solid var(--purple)
+    }
+
+    .item.locked {
+      opacity: .48;
+      cursor: not-allowed
+    }
+
+    .item b {
+      display: block
+    }
+
+    .reward {
+      font-size: 12px;
+      color: var(--purple);
+      margin-top: 5px
+    }
+
+    .world {
+      height: 570px;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background:
+        linear-gradient(#bce0ef 0 28%, transparent 28%),
+        linear-gradient(90deg, transparent 0 11%, #d9d2bd 11% 18%, transparent 18% 45%, #d9d2bd 45% 55%, transparent 55% 82%, #d9d2bd 82% 89%, transparent 89%),
+        #8fc68a
+    }
+
+    .building {
+      position: absolute;
+      background: #f2e4c9;
+      border: 4px solid #5b515f;
+      border-radius: 7px;
+      padding: 9px;
+      font-weight: 700;
+      text-align: center
+    }
+
+    .library {
+      left: 36px;
+      top: 80px;
+      width: 185px;
+      height: 95px
+    }
+
+    .career {
+      right: 42px;
+      top: 75px;
+      width: 205px;
+      height: 110px
+    }
+
+    .cafe {
+      left: 405px;
+      bottom: 55px;
+      width: 155px;
+      height: 80px
+    }
+
+    .path {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 280px;
+      height: 92px;
+      background: #ddd5c2
+    }
+
+    .tree {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #4f9b56;
+      border: 4px solid #367541
+    }
+
+    .tree:after {
+      content: "";
+      position: absolute;
+      left: 19px;
+      top: 39px;
+      width: 10px;
+      height: 36px;
+      background: #765538
+    }
+
+    .mini {
+      position: absolute;
+      width: 48px;
+      height: 70px;
+      transition: left .08s linear, top .08s linear
+    }
+
+    .mini .mhead {
+      position: absolute;
+      left: 13px;
+      top: 0;
+      width: 24px;
+      height: 26px;
+      background: #d99b72;
+      border: 2px solid #292330;
+      border-radius: 45%
+    }
+
+    .mini .mbody {
+      position: absolute;
+      left: 9px;
+      top: 25px;
+      width: 32px;
+      height: 33px;
+      background: #784bb4;
+      border: 2px solid #292330;
+      border-radius: 7px
+    }
+
+    .mini .mlegs {
+      position: absolute;
+      left: 12px;
+      top: 58px;
+      width: 26px;
+      height: 10px;
+      border-left: 8px solid #343746;
+      border-right: 8px solid #343746
+    }
+
+    .mini.blazer .mbody {
+      background: #262a36
+    }
+
+    .mini.hoodie .mbody {
+      background: #6085c4
+    }
+
+    .mini.gold-jacket .mbody {
+      background: #e0b13e
+    }
+
+    .mini.hat-on:after {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: -5px;
+      width: 32px;
+      height: 9px;
+      background: #17151c;
+      border: 2px solid #292330;
+      border-radius: 50%
+    }
+
+    .label {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: #fff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+      box-shadow: 0 2px 6px #0002
+    }
+
+    .chat {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      width: 320px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid var(--line)
+    }
+
+    .chatlog {
+      height: 90px;
+      overflow: auto;
+      font-size: 12px;
+      margin-bottom: 7px
+    }
+
+    .chat input {
+      width: 70%;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 8px
+    }
+
+    .chat button,
+    .primary {
+      border: 0;
+      background: #17151c;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 9px;
+      cursor: pointer
+    }
+
+    .demo {
+      background: #17151c;
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 14px
+    }
+
+    .demo button {
+      background: #fff;
+      color: #17151c;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      margin-top: 8px
+    }
+
+    .status {
+      font-size: 12px;
+      margin-top: 8px;
+      color: #d9c4ef
+    }
+
+    @media(max-width:900px) {
+      .layout {
+        grid-template-columns: 1fr
+      }
+
+      .world {
+        height: 520px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="top">
+      <div>
+        <div style="font-weight:800;font-size:24px">Alumable Avatar Lab</div>
+        <div style="color:#726d78">Proof-of-concept: cosmetic rewards + shared Campus Hub</div>
+      </div>
+      <div class="tabs"><button class="tab active">Avatar</button><button class="tab">Campus Hub</button><a class="tab"
+          href="student.html" style="text-decoration:none;color:inherit">Student XP Demo</a></div>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="panel">
+          <h2 style="margin-top:0">Jack's Avatar</h2>
+          <div class="avatar-stage">
+            <div id="avatar" class="avatar">
+              <div class="hair"></div>
+              <div class="head"></div>
+              <div class="eye l"></div>
+              <div class="eye r"></div>
+              <div class="body"></div>
+              <div class="legs"></div>
+              <div class="shoe"></div>
+              <div class="hat"></div>
+              <div class="glasses"></div>
+              <div class="badgepin">★</div>
+            </div>
+            <div class="avatar-name">Jack Brown · Level <span id="level">4</span></div>
+          </div>
+
+          <div class="section-title">Outfit</div>
+          <div class="griditems">
+            <div class="item selected" data-slot="outfit" data-class="" onclick="equip(this)"><b>Starter
+                Tee</b><span>Owned</span></div>
+            <div class="item" data-slot="outfit" data-class="hoodie" onclick="equip(this)"><b>Campus
+                Hoodie</b><span>Owned</span></div>
+            <div id="blazerItem" class="item locked" data-slot="outfit" data-class="blazer" onclick="equip(this)">
+              <b>Career Blazer</b>
+              <div class="reward">Unlock: Employer Assessment</div>
+            </div>
+            <div id="goldItem" class="item locked" data-slot="outfit" data-class="gold-jacket" onclick="equip(this)">
+              <b>Gold Jacket</b>
+              <div class="reward">Unlock: Level 5</div>
+            </div>
+          </div>
+
+          <div class="section-title">Accessories</div>
+          <div class="griditems">
+            <div class="item" data-slot="hat" data-class="hat-on" onclick="equip(this)"><b>Alumable
+                Cap</b><span>Owned</span></div>
+            <div class="item" data-slot="glasses" data-class="glasses-on" onclick="equip(this)"><b>Studio
+                Glasses</b><span>Owned</span></div>
+            <div id="badgeItem" class="item locked" data-slot="badge" data-class="badge-on" onclick="equip(this)">
+              <b>Career Star Pin</b>
+              <div class="reward">Unlock: Career Starter achievement</div>
+            </div>
+          </div>
+
+          <div class="demo">
+            <b>Reward integration demo</b><br>
+            <span style="font-size:13px;color:#d9c4ef">Simulates the existing XP Engine returning cosmetic unlocks
+              alongside XP.</span><br>
+            <button id="rewardBtn" onclick="completeRewardDemo()">Complete Employer Assessment</button>
+            <div id="rewardStatus" class="status">890 XP · Level 4 · Career items locked</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h2 style="margin:0">Campus Hub</h2>
+            <div style="color:#726d78">Use arrow keys or WASD to move Jack.</div>
+          </div>
+          <div id="online">4 users online</div>
+        </div>
+        <div id="world" class="world" tabindex="0">
+          <div class="building library">Resource Library<br><span style="font-weight:400;font-size:12px">Learning &
+              portfolios</span></div>
+          <div class="building career">Employer Lounge<br><span style="font-weight:400;font-size:12px">Meet
+              employers</span></div>
+          <div class="building cafe">Student Café</div>
+          <div class="path"></div>
+          <div class="tree" style="left:270px;top:65px"></div>
+          <div class="tree" style="right:300px;bottom:100px"></div>
+
+          <div id="player" class="mini" style="left:330px;top:300px">
+            <div class="label">Jack</div>
+            <div class="mhead"></div>
+            <div class="mbody"></div>
+            <div class="mlegs"></div>
+          </div>
+          <div class="mini hoodie" style="left:520px;top:210px">
+            <div class="label">Priya · L3</div>
+            <div class="mhead"></div>
+            <div class="mbody"></div>
+            <div class="mlegs"></div>
+          </div>
+          <div class="mini blazer" style="left:710px;top:330px">
+            <div class="label">Marcus · L5</div>
+            <div class="mhead"></div>
+            <div class="mbody"></div>
+            <div class="mlegs"></div>
+          </div>
+          <div class="mini" style="left:190px;top:405px">
+            <div class="label">Ava · L2</div>
+            <div class="mhead"></div>
+            <div class="mbody"></div>
+            <div class="mlegs"></div>
+          </div>
+
+          <div class="chat">
+            <div id="chatlog" class="chatlog"><b>Campus:</b> Welcome to the Alumable Campus Hub.<br><b>Priya:</b> Anyone
+              joining the Portfolio Sprint?</div>
+            <input id="chatinput" placeholder="Say hello..."><button onclick="sendChat()">Send</button>
+          </div>
+        </div>
+        <p style="color:#726d78;font-size:13px;margin-bottom:0">This room is intentionally a 2D proof-of-concept. A
+          production version could use a multiplayer realtime layer and final Alumable avatar artwork without changing
+          the reward/inventory data model.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let xp = 890,
+      level = 4;
+    let equipped = {
+      outfit: "",
+      hat: "",
+      glasses: "",
+      badge: ""
+    };
+    const avatar = document.getElementById("avatar"),
+      player = document.getElementById("player");
+
+    function syncClasses() {
+      avatar.className = "avatar " + Object.values(equipped).join(" ");
+      player.className = "mini " + Object.values(equipped).join(" ");
+    }
+
+    function equip(el) {
+      if (el.classList.contains("locked")) return;
+      const slot = el.dataset.slot;
+      document.querySelectorAll(`[data-slot="${slot}"]`).forEach(x => x.classList.remove("selected"));
+      el.classList.add("selected");
+      equipped[slot] = el.dataset.class;
+      syncClasses();
+    }
+
+    function completeRewardDemo() {
+      if (document.getElementById("rewardBtn").disabled) return;
+      xp += 250; // employer assessment
+      xp += 50; // Career Starter achievement bonus
+      document.getElementById("blazerItem").classList.remove("locked");
+      document.getElementById("badgeItem").classList.remove("locked");
+      if (xp < 1350) {
+        // additional demo career workshop to demonstrate level-linked cosmetic unlock
+        xp += 200;
+      }
+      if (xp >= 1350) {
+        level = 5;
+        document.getElementById("goldItem").classList.remove("locked");
+      }
+      document.getElementById("level").textContent = level;
+      document.getElementById("rewardStatus").innerHTML =
+        `${xp} XP · Level ${level} · <b>Career Blazer</b>, <b>Career Star Pin</b>${level>=5?' and <b>Gold Jacket</b>':''} unlocked`;
+      document.getElementById("rewardBtn").textContent = "✓ Rewards unlocked";
+      document.getElementById("rewardBtn").disabled = true;
+    }
+    const world = document.getElementById("world");
+    world.addEventListener("click", () => world.focus());
+    let px = 330,
+      py = 300;
+
+    function move(dx, dy) {
+      px = Math.max(5, Math.min(world.clientWidth - 55, px + dx));
+      py = Math.max(5, Math.min(world.clientHeight - 80, py + dy));
+      player.style.left = px + "px";
+      player.style.top = py + "px";
+    }
+    world.addEventListener("keydown", e => {
+      const k = e.key.toLowerCase();
+      if (["arrowup", "w"].includes(k)) move(0, -12);
+      if (["arrowdown", "s"].includes(k)) move(0, 12);
+      if (["arrowleft", "a"].includes(k)) move(-12, 0);
+      if (["arrowright", "d"].includes(k)) move(12, 0);
+      if (k.startsWith("arrow")) e.preventDefault();
+    });
+
+    function sendChat() {
+      const input = document.getElementById("chatinput");
+      if (!input.value.trim()) return;
+      document.getElementById("chatlog").innerHTML += `<br><b>Jack:</b> ${input.value.replace(/[<>]/g,"")}`;
+      input.value = "";
+    }
+    syncClasses();
+  </script>
+</body>
+
+</html>
