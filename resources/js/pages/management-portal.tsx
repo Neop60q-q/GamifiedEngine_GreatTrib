@@ -1,6 +1,11 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import { Box, PortalPage } from '@/components/portal-page';
+import ManagementLibrary from '@/components/management/management-library';
+import type { LibraryItem } from '@/components/management/library-card';
+import CreateItemForm, {
+    type CreatedItem,
+} from '@/components/management/create-item-form';
 
 type Role = 'educator' | 'employer';
 type ItemType = 'activity' | 'challenge';
@@ -8,9 +13,11 @@ type ItemType = 'activity' | 'challenge';
 type Definition = {
     id: number;
     title: string;
+    description?: string | null;
     type: string;
     xp_value: number;
     verification: string;
+    repeatability?: string;
 };
 
 type Draft = {
@@ -21,12 +28,6 @@ type Draft = {
     role: Role;
     actorId: string;
 };
-
-const templates = [
-    { title: 'Attend a career workshop', type: 'activity' as const, xp: 150 },
-    { title: 'Complete an employer gig', type: 'challenge' as const, xp: 250 },
-];
-
 export default function ManagementPortal({
     definitions,
     initialRole,
@@ -39,52 +40,70 @@ export default function ManagementPortal({
         initialRole === 'educator' ? 'educator-demo-001' : 'employer-demo-001',
     );
     const [showModal, setShowModal] = useState(false);
-    const [showTemplates, setShowTemplates] = useState(false);
-    const [title, setTitle] = useState('');
-    const [type, setType] = useState<ItemType>(
-        initialRole === 'educator' ? 'activity' : 'challenge',
-    );
-    const [xp, setXp] = useState(100);
+
     const [drafts, setDrafts] = useState<Draft[]>([]);
+    const [createdItems, setCreatedItems] =
+    useState<CreatedItem[]>([]);
+
+
+    const handleCreated = (item: CreatedItem) => {
+    setCreatedItems((items) => [item, ...items]);
+    setShowModal(false);
+    };
+
+
+
+    const libraryItems: LibraryItem[] = [
+    ...createdItems.map((item) => ({
+        id: `created-${item.id}`,
+        title: item.title,
+        description: item.description,
+        type: item.type,
+        xp_value: item.xp_value,
+        creator_label: item.creator_type,
+        status: item.status,
+    })),
+
+    ...drafts.map((draft) => ({
+        id: `draft-${draft.id}`,
+        title: draft.title,
+        description: null,
+        type: draft.type,
+        xp_value: draft.xp,
+        creator_label: draft.role,
+        status: 'draft',
+    })),
+
+    ...definitions
+        .filter(
+            (definition) =>
+                definition.type === 'activity' ||
+                definition.type === 'challenge',
+        )
+        .map((definition) => ({
+            id: `definition-${definition.id}`,
+            title: definition.title,
+            description: null,
+            type: definition.type as ItemType,
+            xp_value: definition.xp_value,
+            creator_label: 'Alumable seed',
+            status: 'published',
+        })),
+    ];
 
     const changeRole = (nextRole: Role) => {
         setRole(nextRole);
         setActorId(
-            nextRole === 'educator' ? 'educator-demo-001' : 'employer-demo-001',
+            nextRole === 'educator'
+                ? 'educator-demo-001'
+                : 'employer-demo-001',
         );
-        setType(nextRole === 'educator' ? 'activity' : 'challenge');
     };
 
     const openCreate = () => {
-        setTitle('');
-        setXp(100);
-        setShowTemplates(false);
         setShowModal(true);
     };
 
-    const useTemplate = (template: (typeof templates)[number]) => {
-        setTitle(template.title);
-        setType(template.type);
-        setXp(template.xp);
-        setShowTemplates(false);
-    };
-
-    const saveDraft = () => {
-        if (!title.trim() || !actorId.trim() || xp < 1) return;
-
-        setDrafts((items) => [
-            {
-                id: Date.now(),
-                title: title.trim(),
-                type,
-                xp,
-                role,
-                actorId: actorId.trim(),
-            },
-            ...items,
-        ]);
-        setShowModal(false);
-    };
 
     return (
         <>
@@ -219,163 +238,32 @@ export default function ManagementPortal({
                     </Box>
                 </div>
 
+                <ManagementLibrary
+                    items={libraryItems}
+                    onCreate={openCreate}
+                />
+                
                 {showModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                        <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded border border-gray-400 bg-white p-6 shadow-xl">
-                            <div className="mb-5 flex items-start justify-between gap-4">
-                                <div>
-                                    <h2 className="text-xl font-bold">
-                                        Create new challenge/activity
-                                    </h2>
-                                    <p className="mt-1 text-sm text-gray-500 capitalize">
-                                        Creating as {role}: {actorId}
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowModal(false)}
-                                    className="text-2xl leading-none"
-                                    aria-label="Close"
-                                >
-                                    ×
-                                </button>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setShowTemplates((value) => !value)
-                                }
-                                className="mb-4 rounded border border-blue-600 px-3 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50"
-                            >
-                                Use templates
-                            </button>
-
-                            {showTemplates && (
-                                <div className="mb-4 space-y-2 rounded border border-blue-200 bg-blue-50 p-3">
-                                    {templates.map((template) => (
-                                        <button
-                                            key={template.title}
-                                            type="button"
-                                            onClick={() =>
-                                                useTemplate(template)
-                                            }
-                                            className="block w-full rounded border border-gray-300 bg-white p-3 text-left hover:border-blue-600"
-                                        >
-                                            <span className="font-bold">
-                                                {template.title}
-                                            </span>
-                                            <span className="block text-sm text-gray-500 capitalize">
-                                                {template.type} - {template.xp}{' '}
-                                                XP
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="space-y-4">
-                                <Field label="Title">
-                                    <input
-                                        value={title}
-                                        onChange={(event) =>
-                                            setTitle(event.target.value)
-                                        }
-                                        className="w-full rounded border border-gray-400 px-3 py-2"
-                                        placeholder="Enter a title"
-                                    />
-                                </Field>
-                                <Field label="Type">
-                                    <select
-                                        value={type}
-                                        onChange={(event) =>
-                                            setType(
-                                                event.target.value as ItemType,
-                                            )
-                                        }
-                                        className="w-full rounded border border-gray-400 px-3 py-2"
-                                    >
-                                        <option value="activity">
-                                            Activity
-                                        </option>
-                                        <option value="challenge">
-                                            Challenge
-                                        </option>
-                                    </select>
-                                </Field>
-                                <Field label="Select student">
-                                    <select
-                                        defaultValue=""
-                                        className="w-full rounded border border-gray-400 px-3 py-2"
-                                    >
-                                        <option value="" disabled>
-                                            Select a student
-                                        </option>
-                                        <option value="student-demo-001">
-                                            Demo Student
-                                        </option>
-                                    </select>
-                                </Field>
-                                <section className="rounded border border-gray-300 bg-gray-50 p-4">
-                                    <h3 className="font-bold">Reward</h3>
-                                    <p className="mt-1 mb-4 text-sm text-gray-500">
-                                        Set the reward students receive when
-                                        they complete this task.
-                                    </p>
-                                    <Field label="XP value">
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={xp}
-                                            onChange={(event) =>
-                                                setXp(
-                                                    Number(event.target.value),
-                                                )
-                                            }
-                                            className="w-full rounded border border-gray-400 bg-white px-3 py-2"
-                                        />
-                                    </Field>
-                                    <label className="mt-4 flex items-start gap-3 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            className="mt-0.5 size-4 shrink-0 rounded border-gray-400"
-                                        />
-                                        <span>
-                                            Reward
-                                            achievements/accessories/professor_editable_endorsement_badges?
-                                            (to be developed if time permits)
-                                        </span>
-                                    </label>
-                                </section>
-                            </div>
-
-                            <p className="mt-4 rounded bg-yellow-50 p-3 text-sm text-yellow-900">
-                                Prototype: saving creates a browser-only draft.
-                                Production creation will require authentication,
-                                validation and an approval policy.
-                            </p>
-                            <div className="mt-5 flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowModal(false)}
-                                    className="rounded border border-gray-400 px-4 py-2"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={saveDraft}
-                                    disabled={
-                                        !title.trim() ||
-                                        !actorId.trim() ||
-                                        xp < 1
-                                    }
-                                    className="rounded bg-green-700 px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-400"
-                                >
-                                    Save draft
-                                </button>
-                            </div>
-                        </div>
+                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                        <CreateItemForm
+                            creatorType={role}
+                            creatorId={actorId}
+                            initialType={
+                                role === 'educator'
+                                    ? 'activity'
+                                    : 'challenge'
+                            }
+                            activities={definitions
+                                .filter((definition) => definition.type === 'activity')
+                                .map((definition) => ({
+                                    id: definition.id,
+                                    title: definition.title,
+                                    description: definition.description,
+                                    xp_value: definition.xp_value,
+                                    verification: definition.verification,
+                                }))}
+                            onCancel={() => setShowModal(false)}
+                            onCreated={handleCreated}                        />
                     </div>
                 )}
             </PortalPage>
