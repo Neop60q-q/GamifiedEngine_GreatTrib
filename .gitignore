@@ -4,3 +4,12 @@ __pycache__/
 .env
 gamification.db
 .pytest_cache/
+node_modules
+/bootstrap/cache/
+/public/build/
+/public/hot
+/vendor/
+/storage/framework/
+/storage/logs/
+/storage/inertia-devtools/
+/tmp/
