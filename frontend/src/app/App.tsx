@@ -5,10 +5,9 @@ import { Link, useLocation } from '../shared/navigation';
 
 const navItems = [
   ['/', 'Dashboard'],
-  ['/activities', 'Activities'],
-  ['/challenges', 'Challenges'],
-  ['/achievements', 'Achievements'],
-  ['/xp-rules', 'XP Rules'],
+  ['/activities', 'Library'],
+  ['/challenges', 'Assignments'],
+  ['/achievements', 'Review queue'],
 ];
 
 function Layout({ children }: { children: ReactNode }) {
@@ -31,31 +30,40 @@ function Layout({ children }: { children: ReactNode }) {
 }
 
 function StatCard({ label, value, detail, tone = '' }: { label: string; value: string; detail: string; tone?: string }) {
-  return <Card className={`stat-card ${tone}`}><div className="stat-top"><span>{label}</span><span className="stat-icon">↗</span></div><strong>{value}</strong><p>{detail}</p></Card>;
+  return <Card className={`stat-card ${tone}`}><div className="stat-top"><span>{label}</span><span className="stat-icon">↗</span></div><strong>{value}</strong><p>{detail || label}</p></Card>;
 }
 
 function Dashboard() {
-  const { completed, xp, level, progress } = useDemo();
-  return <><PageHeading eyebrow="OVERVIEW" title="Good morning, Jordan" actions={<button>+ Create activity</button>}>Here’s what’s happening with your gamification engine today.</PageHeading>
-    <div className="stat-grid"><StatCard label="TOTAL ACTIVITIES" value="24" detail="+12.5% from last month" tone="purple" /><StatCard label="ACTIVE CHALLENGES" value="8" detail="+4 new this week" /><StatCard label="ACHIEVEMENTS" value="16" detail="3 unlocked this month" /><StatCard label="TOTAL XP AWARDED" value="12,450" detail="+18.2% from last month" tone="pink" /></div>
-    <div className="dashboard-grid"><Card className="wide-card"><div className="card-heading"><div><h2>Recent activities</h2><p className="muted">Latest activities created in your engine</p></div><Link className="text-link" href="/activities">View all →</Link></div><ActivityTable compact /></Card><Card><div className="card-heading"><div><h2>XP overview</h2><p className="muted">Your current progression</p></div></div><div className="level-panel"><div className="level-ring">{level}</div><div><strong>Level {level}</strong><p className="muted">{xp} total XP</p></div></div><div className="progress-label"><span>Progress to next level</span><span>{Math.round(progress * 100)}%</span></div><div className="progress"><span style={{ width: `${Math.round(progress * 100)}%` }} /></div><p className="muted">{completed.length ? `${completed.length} activities completed` : 'Start completing activities to earn XP'}</p></Card></div>
-  </>;
-}
-
-const activities = [
-  ['Complete Employer Assessment', 'Employment', 'Active', '300 XP'],
-  ['Attend Career Workshop', 'Career Development', 'Active', '200 XP'],
-  ['Build your portfolio', 'Skills', 'Draft', '150 XP'],
-  ['Submit your resume', 'Employment', 'Inactive', '100 XP'],
-];
-function ActivityTable({ compact = false }: { compact?: boolean }) {
-  const rows = compact ? activities.slice(0, 3) : activities;
-  return <div className="table-wrap"><table><thead><tr><th>ACTIVITY</th><th>CATEGORY</th><th>STATUS</th><th>XP</th><th></th></tr></thead><tbody>{rows.map(row => <tr key={row[0]}><td><strong>{row[0]}</strong><small>ID: ACT-{row[0].length * 17}</small></td><td>{row[1]}</td><td><span className={`status ${row[2].toLowerCase()}`}>{row[2]}</span></td><td>{row[3]}</td><td><button className="icon-button" aria-label={`Open ${row[0]}`}>•••</button></td></tr>)}</tbody></table></div>;
+  const approvals = [
+    ['JB', 'Jack Brown', 'Attend Career Workshop', '2h ago', 'lilac'],
+    ['ML', 'Marcus Lee', 'Complete Employer Assessment', '5h ago', 'blue'],
+    ['PS', 'Priya Sharma', 'Upload Resume Draft', '1d ago', 'mint'],
+  ];
+  return <div className="client-dashboard">
+    <PageHeading eyebrow="" title="Good morning, Northline Studio" />
+    <div className="stat-grid client-stats">
+      <StatCard label="Active activities" value="6" detail="" />
+      <StatCard label="Active challenges" value="2" detail="" />
+      <StatCard label="Students assigned" value="34" detail="" />
+      <StatCard label="Pending approvals" value="5" detail="" tone="amber" />
+    </div>
+    <section className="client-section"><h2>Activities &amp; challenges</h2><div className="client-table"><div className="client-table-head"><span>Activity / Challenge</span><span>Status</span><span>Assigned</span></div>
+      {[['Attend Career Workshop', 'Active', '12'], ['Portfolio Sprint Challenge', 'Draft', '—'], ['Complete Employer Assessment', 'Active', '22']].map(row => <div className="client-table-row" key={row[0]}><strong>{row[0]}</strong><span className={`client-pill ${row[1].toLowerCase()}`}>{row[1]}</span><span>{row[2]}</span></div>)}
+    </div></section>
+    <section className="client-section approvals"><h2>Pending approvals</h2><div className="approval-list">{approvals.map(row => <div className="approval-row" key={row[1]}><span className={`approval-avatar ${row[4]}`}>{row[0]}</span><div className="approval-person"><strong>{row[1]}</strong><span>{row[2]}</span></div><span className="client-pill review">Pending review</span><span className="approval-time">{row[3]}</span><button className="review-button">Review</button></div>)}</div></section>
+  </div>;
 }
 
 function Activities() {
   const [showModal, setShowModal] = useState(false);
-  return <><PageHeading eyebrow="ACTIVITY MANAGEMENT" title="Activities" actions={<button onClick={() => setShowModal(true)}>+ Create activity</button>}>Create and manage activities that award XP to students.</PageHeading><Card><div className="filterbar"><div className="search">⌕ <input placeholder="Search activities..." /></div><select defaultValue="all"><option value="all">All categories</option><option>Employment</option><option>Skills</option></select><select defaultValue="all"><option value="all">All status</option><option>Active</option><option>Draft</option></select><button className="secondary">Filter</button></div><ActivityTable /></Card>{showModal && <CreateModal onClose={() => setShowModal(false)} />}</>;
+  const templates = [
+    ['CHALLENGE · PHASE ONE', 'Attend Career Workshop', 'Attend and participate in an employer-hosted careers session.', 'Moderate · 2 hrs', '~120 XP'],
+    ['ACTIVITY · PHASE ONE', 'Upload Resume Draft', 'Submit a resume for automatic profile completion credit.', 'Easy · 30 min', '~45 XP'],
+    ['CHALLENGE', 'Portfolio Sprint Challenge', 'Five activities culminating in employer portfolio review.', 'Hard · one week · five activities', '~275 XP'],
+    ['ACTIVITY · PHASE ONE', 'Complete Employer Assessment', 'Scenario-based task reviewed and approved by your team.', 'Difficult · 3 hrs', '~250 XP'],
+    ['ACTIVITY · PHASE ONE', 'Daily Login Streak', 'Automatic credit for returning to the platform daily.', 'Very Easy · 10 min', '~5 XP'],
+  ];
+  return <div className="library-page"><PageHeading eyebrow="" title="Activities &amp; Challenges Library" actions={<button className="template-button" onClick={() => setShowModal(true)}><span>add</span> New from template</button>}>Choose from Alumable’s approved Phase-One templates — XP is set by the Gamification Engine once you configure requirements.</PageHeading><div className="library-toolbar"><div className="library-tabs"><button className="selected">All</button><button>Activities</button><button>Challenges</button></div><div className="library-search"><span>search</span><input placeholder="Search templates" /></div></div><div className="template-grid">{templates.map(template => <Card className="template-card" key={template[1]}><p className="template-type">{template[0]}</p><h2>{template[1]}</h2><p className="template-description">{template[2]}</p><div className="template-meta"><span>{template[3]}</span><strong>{template[4]}</strong></div></Card>)}<div className="coming-card">More templates coming soon</div></div>{showModal && <CreateModal onClose={() => setShowModal(false)} />}</div>;
 }
 
 function CreateModal({ onClose }: { onClose: () => void }) {
