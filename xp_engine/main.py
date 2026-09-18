@@ -14,6 +14,11 @@ from services.recalculation_service import RecalculationService
 from services.xp_award_service import XPAwardService
 from shared.models import ActivityRecalculateRequest, CompletionEvent
 
+from services.skill_xp_service import SkillXPService
+from services.skill_progression_service import SkillProgressionService
+from repositories.skill_repository import SkillRepository
+
+
 
 app = FastAPI(
     title="Alumable XP Engine v6",
@@ -28,6 +33,9 @@ achievements = AchievementService()
 avatar_rewards = AvatarRewardService()
 recalculation = RecalculationService()
 
+skill_xp = SkillXPService()
+skill_progression = SkillProgressionService()
+skills = SkillRepository()
 
 @app.get("/health")
 def health():
@@ -102,6 +110,25 @@ def complete_activity(
         f"activity:{event.event_id}",
         source_completion_id=completion.id,
     )
+
+    # Skill XP is awarded after task XP, but before achievement rules are evaluated.
+    skill_awards = skill_xp.award_activity_skills(
+        db, event.external_user_id, activity, completion, event.event_id
+    )
+    skill_results = []
+    for result in skill_awards:
+        skill_total = skill_xp.total(db, event.external_user_id, result["skill_id"])
+        skill_level = skill_progression.update(
+            db, event.external_user_id, result["skill_id"], skill_total
+        )
+        skill_results.append({
+            "skill_code": result["skill_code"],
+            "skill_name": result["skill_name"],
+            "xp_awarded": result["xp_awarded"],
+            "total_xp": skill_total,
+            **skill_level,
+        })
+
 
     total = awards.total(
         db,
@@ -209,6 +236,7 @@ def complete_activity(
         "total_xp": total,
         "achievements_unlocked": achievement_results,
         "cosmetics_unlocked": cosmetic_results,
+        "skill_results": skill_results,
         **level_result,
     }
 
@@ -229,9 +257,19 @@ def get_progress(
         total
     )
 
+    skill_results = []
+    for skill in skills.list_active(db):
+        skill_total = skill_xp.total(db, external_user_id, skill.id)
+        if skill_total <= 0:
+            continue
+        level = skill_progression.update(db, external_user_id, skill.id, skill_total)
+        skill_results.append({"skill_code": skill.code, "skill_name": skill.name,
+                              "total_xp": skill_total, **level})
+
     return {
         "external_user_id": external_user_id,
         "total_xp": total,
+        "skills": skill_results,
         **result,
     }
 

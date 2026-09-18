@@ -203,3 +203,73 @@ CREATE TABLE IF NOT EXISTS virtual_rooms (
 -- Live position is ideally ephemeral/realtime (Redis/WebSocket state),
 -- not written to MySQL for every movement. MySQL can store last-known
 -- room or presence history if Alumable later requires it.
+
+-- Prototype skill system tables. These are not fully fleshed out yet, but will be used to prototype the skill system.
+
+CREATE TABLE IF NOT EXISTS skills (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  external_id VARCHAR(255) NOT NULL UNIQUE,
+  code VARCHAR(100) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  category VARCHAR(100) NULL,
+  parent_skill_id INT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'Active',
+  created_at DATETIME NOT NULL,
+  FOREIGN KEY (parent_skill_id) REFERENCES skills(id)
+);
+
+CREATE TABLE IF NOT EXISTS activity_skill_allocations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  activity_id INT NOT NULL,
+  skill_id INT NOT NULL,
+  percentage FLOAT NOT NULL,
+  UNIQUE KEY uq_activity_skill (activity_id, skill_id),
+  FOREIGN KEY (activity_id) REFERENCES activities(id),
+  FOREIGN KEY (skill_id) REFERENCES skills(id)
+);
+
+CREATE TABLE IF NOT EXISTS skill_xp_transactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  external_user_id VARCHAR(255) NOT NULL,
+  skill_id INT NOT NULL,
+  amount INT NOT NULL,
+  transaction_type VARCHAR(30) NOT NULL,
+  source_type VARCHAR(50) NOT NULL,
+  source_id INT NOT NULL,
+  source_completion_id INT NULL,
+  idempotency_key VARCHAR(255) NOT NULL UNIQUE,
+  created_at DATETIME NOT NULL,
+  FOREIGN KEY (skill_id) REFERENCES skills(id)
+);
+
+CREATE TABLE IF NOT EXISTS completion_skill_awards (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  completion_id INT NOT NULL,
+  skill_id INT NOT NULL,
+  percentage_at_completion FLOAT NOT NULL,
+  xp_value_at_completion INT NOT NULL,
+  UNIQUE KEY uq_completion_skill (completion_id, skill_id),
+  FOREIGN KEY (completion_id) REFERENCES activity_completions(id),
+  FOREIGN KEY (skill_id) REFERENCES skills(id)
+);
+
+CREATE TABLE IF NOT EXISTS student_skill_progress (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  external_user_id VARCHAR(255) NOT NULL,
+  skill_id INT NOT NULL,
+  total_xp INT NOT NULL DEFAULT 0,
+  current_level INT NOT NULL DEFAULT 1,
+  updated_at DATETIME NOT NULL,
+  UNIQUE KEY uq_student_skill_progress (external_user_id, skill_id),
+  FOREIGN KEY (skill_id) REFERENCES skills(id)
+);
+
+CREATE TABLE IF NOT EXISTS skill_level_rules (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  skill_id INT NULL,
+  level INT NOT NULL,
+  required_xp INT NOT NULL,
+  UNIQUE KEY uq_skill_level_rule (skill_id, level),
+  FOREIGN KEY (skill_id) REFERENCES skills(id)
+);

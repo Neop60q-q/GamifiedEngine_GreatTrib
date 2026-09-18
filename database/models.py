@@ -270,3 +270,91 @@ class StudentAvatarEquipment(Base):
             name="uq_avatar_slot"
         ),
     )
+
+
+# Prototype skill system tables. These are not fully fleshed out yet, but will be used to prototype the skill system.
+
+class Skill(Base):
+    __tablename__ = "skills"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    external_id = Column(String(255), nullable=False, unique=True, index=True)
+    code = Column(String(100), nullable=False, unique=True, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(100), nullable=True)
+    parent_skill_id = Column(Integer, ForeignKey("skills.id"), nullable=True)
+    status = Column(String(30), nullable=False, default="Active")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ActivitySkillAllocation(Base):
+    __tablename__ = "activity_skill_allocations"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    activity_id = Column(Integer, ForeignKey("activities.id"), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+    percentage = Column(Float, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("activity_id", "skill_id", name="uq_activity_skill"),
+    )
+
+
+class SkillXPTransaction(Base):
+    __tablename__ = "skill_xp_transactions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    external_user_id = Column(String(255), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+    amount = Column(Integer, nullable=False)
+    transaction_type = Column(String(30), nullable=False)
+    source_type = Column(String(50), nullable=False)
+    source_id = Column(Integer, nullable=False)
+    source_completion_id = Column(Integer, nullable=True)
+    idempotency_key = Column(String(255), nullable=False, unique=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class CompletionSkillAward(Base):
+    """Snapshot of the skill award calculated when an activity was completed."""
+    __tablename__ = "completion_skill_awards"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    completion_id = Column(Integer, ForeignKey("activity_completions.id"), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+    percentage_at_completion = Column(Float, nullable=False)
+    xp_value_at_completion = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("completion_id", "skill_id", name="uq_completion_skill"),
+    )
+
+
+class StudentSkillProgress(Base):
+    __tablename__ = "student_skill_progress"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    external_user_id = Column(String(255), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+    total_xp = Column(Integer, nullable=False, default=0)
+    current_level = Column(Integer, nullable=False, default=1)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("external_user_id", "skill_id", name="uq_student_skill_progress"),
+    )
+
+
+class SkillLevelRule(Base):
+    __tablename__ = "skill_level_rules"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # NULL means the default progression curve used by all skills unless overridden.
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=True, index=True)
+    level = Column(Integer, nullable=False)
+    required_xp = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("skill_id", "level", name="uq_skill_level_rule"),
+    )

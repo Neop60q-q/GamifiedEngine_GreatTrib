@@ -8,6 +8,8 @@ from database.models import (
     LevelRule,
     XPRuleSet,
     XPRuleValue,
+    Skill,
+    SkillLevelRule
 )
 
 
@@ -119,6 +121,36 @@ def seed():
                             xp_value=xp
                         )
                     )
+
+        skill_levels = [(1, 0), (2, 100), (3, 350), (4, 750), (5, 1350), (6, 2250)]
+        for level, required_xp in skill_levels:
+            existing_skill_level = db.query(SkillLevelRule).filter(
+                SkillLevelRule.skill_id.is_(None), SkillLevelRule.level == level
+            ).first()
+            if existing_skill_level is None:
+                db.add(SkillLevelRule(skill_id=None, level=level, required_xp=required_xp))
+
+        demo_skills = [
+            ("skill-software-development", "SOFTWARE_DEVELOPMENT", "Software Development", "Technology"),
+            ("skill-cybersecurity", "CYBERSECURITY", "Cybersecurity", "Technology"),
+            ("skill-communication", "COMMUNICATION", "Communication", "Professional Skills"),
+        ]
+        for external_id, code, name, category in demo_skills:
+            if db.query(Skill).filter(Skill.code == code).first() is None:
+                db.add(Skill(external_id=external_id, code=code, name=name, category=category, status="Active"))
+
+        for level, required_xp, unlock_code, unlock_name in LEVELS:
+            if db.get(LevelRule, level) is None:
+                db.add(
+                    LevelRule(
+                        level=level,
+                        required_xp=required_xp,
+                        unlock_code=unlock_code,
+                        unlock_name=unlock_name
+                    )
+                )
+
+
 
         for level, required_xp, unlock_code, unlock_name in LEVELS:
             if db.get(LevelRule, level) is None:

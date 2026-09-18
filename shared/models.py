@@ -80,6 +80,12 @@ class XPFactors(BaseModel):
     ]
 
 
+# Prototype skill system fields. These are not fully fleshed out yet, but will be used to prototype the skill system.
+class SkillAllocationInput(BaseModel):
+    skill_code: str
+    percentage: float = Field(gt=0, le=100)
+
+
 class ActivityCreate(BaseModel):
     creator_external_id: str
     creator_role: Literal["EMPLOYER", "EDUCATOR"]
@@ -92,6 +98,9 @@ class ActivityCreate(BaseModel):
     category: str
 
     factors: XPFactors
+
+    # Prototype skill system fields. These are not fully fleshed out yet, but will be used to prototype the skill system.
+    skill_allocations: list[SkillAllocationInput] = Field(default_factory=list)    
 
     start_date: Optional[str] = None
     end_date: Optional[str] = None
