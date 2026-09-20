@@ -99,6 +99,12 @@ class ActivityCreate(BaseModel):
     status: Literal["Draft", "Active", "Inactive"] = "Draft"
 
 
+class ActivityMVPCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    description: str = Field(min_length=1)
+    category: str = Field(min_length=1, max_length=50)
+
+
 class CompletionEvent(BaseModel):
     event_id: str
     external_user_id: str

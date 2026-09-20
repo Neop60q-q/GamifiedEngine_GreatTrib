@@ -1,7 +1,8 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Card, Modal, PageHeading } from '../shared/components';
 import { DemoProvider, useDemo } from '../shared/DemoProvider';
 import { Link, useLocation } from '../shared/navigation';
+import { createActivity, listActivities, type PersistedActivity } from '../features/activity-creation/api';
 
 const navItems = [
   ['/', 'Dashboard'],
@@ -56,6 +57,15 @@ function Dashboard() {
 
 function Activities() {
   const [showModal, setShowModal] = useState(false);
+  const [activities, setActivities] = useState<PersistedActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    listActivities()
+      .then(setActivities)
+      .catch(value => setError(value instanceof Error ? value.message : 'Could not load activities'))
+      .finally(() => setLoading(false));
+  }, []);
   const templates = [
     ['CHALLENGE · PHASE ONE', 'Attend Career Workshop', 'Attend and participate in an employer-hosted careers session.', 'Moderate · 2 hrs', '~120 XP'],
     ['ACTIVITY · PHASE ONE', 'Upload Resume Draft', 'Submit a resume for automatic profile completion credit.', 'Easy · 30 min', '~45 XP'],
@@ -63,20 +73,25 @@ function Activities() {
     ['ACTIVITY · PHASE ONE', 'Complete Employer Assessment', 'Scenario-based task reviewed and approved by your team.', 'Difficult · 3 hrs', '~250 XP'],
     ['ACTIVITY · PHASE ONE', 'Daily Login Streak', 'Automatic credit for returning to the platform daily.', 'Very Easy · 10 min', '~5 XP'],
   ];
-  return <div className="library-page"><PageHeading eyebrow="" title="Activities &amp; Challenges Library" actions={<button className="template-button" onClick={() => setShowModal(true)}><span>add</span> New from template</button>}>Choose from Alumable’s approved Phase-One templates — XP is set by the Gamification Engine once you configure requirements.</PageHeading><div className="library-toolbar"><div className="library-tabs"><button className="selected">All</button><button>Activities</button><button>Challenges</button></div><div className="library-search"><span>search</span><input placeholder="Search templates" /></div></div><div className="template-grid">{templates.map(template => <Card className="template-card" key={template[1]}><p className="template-type">{template[0]}</p><h2>{template[1]}</h2><p className="template-description">{template[2]}</p><div className="template-meta"><span>{template[3]}</span><strong>{template[4]}</strong></div></Card>)}<div className="coming-card">More templates coming soon</div></div>{showModal && <CreateModal onClose={() => setShowModal(false)} />}</div>;
+  return <div className="library-page"><PageHeading eyebrow="" title="Activities &amp; Challenges Library" actions={<button className="template-button" onClick={() => setShowModal(true)}><span>add</span> New from template</button>}>Choose from Alumable’s approved Phase-One templates — XP is set by the Gamification Engine once you configure requirements.</PageHeading><div className="library-toolbar"><div className="library-tabs"><button className="selected">All</button><button>Activities</button><button>Challenges</button></div><div className="library-search"><span>search</span><input placeholder="Search templates" /></div></div>{loading && <p className="muted">Loading saved activities...</p>}{error && <p role="alert">{error}</p>}<div className="template-grid">{activities.map(activity => <Card className="template-card" key={activity.external_id}><p className="template-type">ACTIVITY · SAVED</p><h2>{activity.title}</h2><p className="template-description">{activity.description}</p><div className="template-meta"><span>{activity.category} · {activity.status}</span><strong>{activity.final_xp} XP</strong></div></Card>)}{templates.map(template => <Card className="template-card" key={template[1]}><p className="template-type">{template[0]}</p><h2>{template[1]}</h2><p className="template-description">{template[2]}</p><div className="template-meta"><span>{template[3]}</span><strong>{template[4]}</strong></div></Card>)}<div className="coming-card">More templates coming soon</div></div>{showModal && <CreateModal onCreated={activity => setActivities(previous => [activity, ...previous])} onClose={() => setShowModal(false)} />}</div>;
 }
 
-function CreateModal({ onClose }: { onClose: () => void }) {
-  const { addDraft } = useDemo();
+function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (activity: PersistedActivity) => void }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('Employment');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!title.trim() || !description.trim()) return;
-    addDraft({ external_id: `demo-${Date.now()}`, title: title.trim(), description: description.trim(), category: 'General', final_xp: null, status: 'Draft', factors: { difficulty: 'MODERATE', estimated_time_value: 2, estimated_time_unit: 'HOURS', skill_level: 'BEGINNER', effort: 'MODERATE', complexity: 'MULTIPLE_STEPS', student_impact: 'HIGH', verification_method: 'EDUCATOR_APPROVAL', repeatability: 'ONE_TIME', completion_type: 'COMPLETION' } });
-    onClose();
+    setSaving(true);
+    setError('');
+    createActivity({ title: title.trim(), description: description.trim(), category })
+      .then(activity => { onCreated(activity); onClose(); })
+      .catch(value => setError(value instanceof Error ? value.message : 'Could not save activity'))
+      .finally(() => setSaving(false));
   }
-  return <Modal title="Create activity" onClose={onClose}><form className="form" onSubmit={submit}><label>Activity name<input value={title} onChange={event => setTitle(event.target.value)} placeholder="e.g. Complete Employer Assessment" required /></label><label>Description<textarea value={description} onChange={event => setDescription(event.target.value)} placeholder="Describe the activity..." required /></label><label>Category<select defaultValue="Employment"><option>Employment</option><option>Career Development</option><option>Skills</option></select></label><div className="modal-actions"><button className="secondary" type="button" onClick={onClose}>Cancel</button><button type="submit">Save draft</button></div></form></Modal>;
+  return <Modal title="Create activity" onClose={onClose}><form className="form" onSubmit={submit}><label>Activity name<input value={title} onChange={event => setTitle(event.target.value)} placeholder="e.g. Complete Employer Assessment" required /></label><label>Description<textarea value={description} onChange={event => setDescription(event.target.value)} placeholder="Describe the activity..." required /></label><label>Category<select value={category} onChange={event => setCategory(event.target.value)}><option>Employment</option><option>Career Development</option><option>Skills</option></select></label>{error && <p role="alert">{error}</p>}<div className="modal-actions"><button className="secondary" type="button" onClick={onClose} disabled={saving}>Cancel</button><button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save draft'}</button></div></form></Modal>;
 }
 
 function ManagementPage({ title, eyebrow, description, children, action }: { title: string; eyebrow: string; description: string; children: ReactNode; action: string }) {

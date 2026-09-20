@@ -34,18 +34,20 @@ class Activity(Base):
     description = Column(Text, nullable=False)
     category = Column(String(50), nullable=False)
 
-    difficulty = Column(String(50), nullable=False)
-    estimated_time_value = Column(Float, nullable=False)
-    estimated_time_unit = Column(String(20), nullable=False)
-    skill_level = Column(String(50), nullable=False)
-    effort = Column(String(50), nullable=False)
-    complexity = Column(String(50), nullable=False)
-    student_impact = Column(String(50), nullable=False)
-    verification_method = Column(String(50), nullable=False)
-    repeatability = Column(String(50), nullable=False)
-    completion_type = Column(String(50), nullable=False)
+    # Advanced XP fields are optional until the XP configuration feature is
+    # enabled for an activity.
+    difficulty = Column(String(50), nullable=True)
+    estimated_time_value = Column(Float, nullable=True)
+    estimated_time_unit = Column(String(20), nullable=True)
+    skill_level = Column(String(50), nullable=True)
+    effort = Column(String(50), nullable=True)
+    complexity = Column(String(50), nullable=True)
+    student_impact = Column(String(50), nullable=True)
+    verification_method = Column(String(50), nullable=True)
+    repeatability = Column(String(50), nullable=True)
+    completion_type = Column(String(50), nullable=True)
 
-    final_xp = Column(Integer, nullable=False)
+    final_xp = Column(Integer, nullable=False, default=0)
     xp_rule_version = Column(Integer, nullable=False, default=1)
     version = Column(Integer, nullable=False, default=1)
 

@@ -2,6 +2,13 @@ from database.models import Activity, ActivityVersion
 
 
 class ActivityRepository:
+    def list(self, db):
+        return (
+            db.query(Activity)
+            .order_by(Activity.created_at.desc(), Activity.id.desc())
+            .all()
+        )
+
     def get_by_external_id(self, db, external_id: str):
         return (
             db.query(Activity)

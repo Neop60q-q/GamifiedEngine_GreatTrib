@@ -12,6 +12,16 @@ The MVP is intentionally limited to creating and displaying basic activities.
 It does not require the advanced gamification configuration shown in the design
 mock-up.
 
+## Schema authority
+
+SQLAlchemy models are the only schema definition used by the application.
+`database/models.py` is loaded by `scripts.init_db` and `scripts.seed_demo` to
+create tables in the configured database. MySQL is the recommended development
+database; SQLite remains available as a lightweight fallback.
+
+Do not edit a separate SQL schema file. When the models change, use a database
+migration before applying the change to an existing MySQL database.
+
 ## MVP scope
 
 The MVP supports:

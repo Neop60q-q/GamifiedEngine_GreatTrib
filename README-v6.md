@@ -8,8 +8,8 @@ integrate without needing to share its internal database structure.
 - Creation Engine — FastAPI / Python
 - XP Engine — FastAPI / Python
 - Avatar Engine — FastAPI / Python
-- SQLAlchemy repository/data-access layer
-- MySQL-compatible persistent models
+- SQLAlchemy repository/data-access layer and schema models
+- MySQL persistent database through `mysql+pymysql`
 - SQLite easy-local mode
 - configurable XP Matrix
 - configurable level thresholds
@@ -21,6 +21,30 @@ integrate without needing to share its internal database structure.
 - Laravel integration examples
 - Docker Compose + MySQL
 - existing Student, Employer/Educator and Avatar browser demos
+
+## Database source of truth
+
+The SQLAlchemy models in `database/models.py` are the single schema definition
+for the application. Initialize the database with:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.init_db
+.venv\Scripts\python.exe -m scripts.seed_demo
+```
+
+Both commands use the `DATABASE_URL` environment variable. There is no separate
+handwritten SQL schema to keep in sync.
+
+For the recommended MySQL mode, set:
+
+```text
+DATABASE_URL=mysql+pymysql://gamification:gamification@localhost:3306/gamification
+```
+
+In MySQL Workbench, connect to `localhost:3306` with username `gamification`
+and password `gamification`, then open the `gamification` schema. If Docker is
+used, run `docker compose up --build`; the `db-seed` container creates the
+tables from SQLAlchemy metadata before the API containers start.
 
 ---
 
