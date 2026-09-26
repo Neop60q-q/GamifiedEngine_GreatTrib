@@ -10,6 +10,8 @@ Route::get('/', fn () => Inertia::render('engine', [
     'levels' => XpLevel::query()->orderBy('level')->get(),
 ]))->name('home');
 
-Route::redirect('/dashboard', '/')->name('dashboard');
+Route::get('/dashboard', fn () => Inertia::render('dashboard'))
+    ->middleware('auth')
+    ->name('dashboard');
 
 require __DIR__.'/settings.php';
