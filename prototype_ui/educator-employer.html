@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Alumable Educator / Employer Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="shell">
+        <aside class="sidebar">
+            <div class="brand">Alumable</div>
+            <div class="nav"><a class="active">Dashboard</a><a>Library</a><a>Assignments</a><a>Review queue</a></div>
+        </aside>
+        <main class="main">
+            <div class="top">
+                <div>
+                    <div class="muted">EMPLOYER / EDUCATOR PORTAL</div>
+                    <h1>Good morning, Northline Studio</h1>
+                </div><button class="button" onclick="document.getElementById('creator').scrollIntoView()">+ New
+                    activity</button>
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="big">6</div>
+                    <div class="muted">Active activities</div>
+                </div>
+                <div class="card">
+                    <div class="big">2</div>
+                    <div class="muted">Active challenges</div>
+                </div>
+                <div class="card">
+                    <div class="big">34</div>
+                    <div class="muted">Students assigned</div>
+                </div>
+                <div class="card">
+                    <div class="big">5</div>
+                    <div class="muted">Pending approvals</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="section-title">Activities & challenges</div>
+                <table>
+                    <tr>
+                        <th>Activity / Challenge</th>
+                        <th>Status</th>
+                        <th>Assigned</th>
+                    </tr>
+                    <tr>
+                        <td>Attend Career Workshop</td>
+                        <td><span class="pill">Active</span></td>
+                        <td>12</td>
+                    </tr>
+                    <tr>
+                        <td>Portfolio Sprint Challenge</td>
+                        <td>Draft</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Employer Assessment</td>
+                        <td><span class="pill">Active</span></td>
+                        <td>22</td>
+                    </tr>
+                </table>
+            </div>
+            <div id="creator" class="section-title">Configure Activity</div>
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px">
+                <div class="card">
+                    <div class="form-grid">
+                        <div class="field"><label>Activity title</label><input id="activity-title" value="Attend Career Workshop"></div>
+                        <div class="field"><label>Activity category</label><select id="activity-category">
+                                <option>Learning</option>
+                                <option>Employment</option>
+                                <option>Networking</option>
+                            </select></div>
+                        <div class="field" style="grid-column:1/-1">
+                            <label>Description</label><textarea id="activity-description">Attend and participate in the employer hosted careers workshop, then submit your notes for credit.</textarea>
+                        </div>
+                        <div class="field"><label>Difficulty</label><select id="difficulty">
+                                <option>Very Easy</option>
+                                <option>Easy</option>
+                                <option selected>Moderate</option>
+                                <option>Difficult</option>
+                                <option>Expert</option>
+                            </select></div>
+                        <div class="field"><label>Estimated completion time</label>
+                            <div style="display:flex;gap:6px"><input id="time" type="number" value="2"><select
+                                    id="unit">
+                                    <option>Minutes</option>
+                                    <option selected>Hours</option>
+                                    <option>Days</option>
+                                    <option>Weeks</option>
+                                </select></div>
+                        </div>
+                        <div class="field"><label>Skill level required</label><select id="skill-level">
+                                <option>None</option>
+                                <option selected>Beginner</option>
+                                <option>Intermediate</option>
+                                <option>Advanced</option>
+                            </select></div>
+                        <div class="field"><label>Effort required</label><select id="effort">
+                                <option>Minimal</option>
+                                <option>Low</option>
+                                <option selected>Moderate</option>
+                                <option>High</option>
+                            </select></div>
+                        <div class="field"><label>Task complexity</label><select id="complexity">
+                                <option>Single Step</option>
+                                <option>Two-Step</option>
+                                <option selected>Multiple Steps</option>
+                                <option>Multi-stage</option>
+                            </select></div>
+                        <div class="field"><label>Student impact</label><select id="impact">
+                                <option>Low</option>
+                                <option>Moderate</option>
+                                <option selected>High</option>
+                                <option>Significant</option>
+                            </select></div>
+                        <div class="field"><label>Verification method</label><select id="verification">
+                                <option>Automatic</option>
+                                <option>Self-Declaration</option>
+                                <option selected>Educator Approval</option>
+                                <option>Employer Approval</option>
+                            </select></div>
+                        <div class="field"><label>Repeatability</label><select id="repeatability">
+                                <option selected>One Time</option>
+                                <option>Daily</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                            </select></div>
+                        <div class="field"><label>Completion type</label><select id="completion-type">
+                                <option>Completion</option>
+                                <option>Pass/Fail</option>
+                                <option selected>Attendance</option>
+                                <option>Submission</option>
+                            </select></div>
+                        <div class="field"><label>Status</label><select id="activity-status">
+                                <option selected>Draft</option>
+                                <option>Active</option>
+                                <option>Inactive</option>
+                            </select></div>
+                    </div>
+                </div>
+                <div class="xp-panel">
+                    <div class="muted">GAMIFICATION ENGINE</div>
+                    <h3>Final XP</h3>
+                    <div class="xp-number" id="xp">120 XP</div>
+                    <p class="muted">The Python service calculates the authoritative XP when the activity is saved.</p><button class="button" onclick="calculateXP()">Preview XP</button><button class="button" style="margin-top:8px" onclick="saveActivity()">Create &amp; publish</button><div id="save-result" class="muted" style="margin-top:10px"></div>
+                </div>
+            </div>
+            <div class="section-title">Challenge example</div>
+            <div class="card">
+                <h3>Portfolio Sprint with Northline Studio</h3>
+                <p class="muted">Five activities, one week. Finish all five and your portfolio goes in front of a hiring
+                    manager.</p>
+                <div class="task-row">
+                    <div>Brief call with Northline</div><b>45 XP</b>
+                </div>
+                <div class="task-row">
+                    <div>Upload three work samples</div><b>120 XP</b>
+                </div>
+                <div class="task-row">
+                    <div>Write a 300-word case study</div><b>30 XP</b>
+                </div>
+                <div class="task-row">
+                    <div>Submit for employer review</div><b>80 XP</b>
+                </div>
+                <hr>
+                <div class="task-row"><b>Challenge completion</b><b>275 XP + 50 bonus</b></div>
+            </div>
+        </main>
+    </div>
+    <script>
+const CREATION_API = 'http://127.0.0.1:8001';
+const map = v => v.trim().toUpperCase().replace(/[\s\/-]+/g,'_').replace('SELF_DECLARATION','SELF_DECLARATION');
+function calculateXP(){ const d=document.getElementById('difficulty').value; const t=Number(document.getElementById('time').value); const base={"Very Easy":20,"Easy":45,"Moderate":80,"Difficult":150,"Expert":250}[d]||50; document.getElementById('xp').innerText=(Math.round((base+t*20)/5)*5)+' XP (preview)'; }
+async function saveActivity(){
+ const result=document.getElementById('save-result'); result.textContent='Saving...';
+ const status=document.getElementById('activity-status').value==='Draft'?'Active':document.getElementById('activity-status').value;
+ const payload={creator_external_id:'demo-educator-html',creator_role:'EDUCATOR',title:document.getElementById('activity-title').value,description:document.getElementById('activity-description').value,category:document.getElementById('activity-category').value,status,factors:{difficulty:map(document.getElementById('difficulty').value),estimated_time_value:Number(document.getElementById('time').value),estimated_time_unit:map(document.getElementById('unit').value),skill_level:map(document.getElementById('skill-level').value),effort:map(document.getElementById('effort').value),complexity:map(document.getElementById('complexity').value),student_impact:map(document.getElementById('impact').value),verification_method:map(document.getElementById('verification').value),repeatability:map(document.getElementById('repeatability').value),completion_type:map(document.getElementById('completion-type').value)},skill_allocations:[],cosmetic_reward_code:null};
+ try{const r=await fetch(CREATION_API+'/v1/activities/prototype',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw new Error(await r.text());const a=await r.json();document.getElementById('xp').innerText=a.final_xp+' XP';result.textContent='Published to database. Students can now refresh their task list.';}catch(e){result.textContent='Could not save: '+e.message;}
+}
+</script>
+</body>
+
+</html>

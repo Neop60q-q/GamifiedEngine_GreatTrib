@@ -1,0 +1,326 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Alumable Student Prototype — Interactive Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="demo-bar"><b>Interactive XP Engine Demo</b><span>Jack starts at <b id="demoStart">890 XP · Level
+                4</b></span><a class="button secondary" href="avatar-space.html" style="text-decoration:none">Avatar &
+            Campus Hub</a><button class="button secondary" onclick="resetDemo()">Reset demo</button></div>
+    <div id="toast" class="toast"></div>
+    <div class="mobile-wrap">
+        <div class="phone">
+            <div class="brand">Alumable</div>
+            <h2>Good morning, Jack</h2>
+            <div class="card">
+                <div class="task-row">
+                    <div><span class="pill" id="homeLevel">Level 4</span>
+                        <div class="muted" id="homeUnlock">Employer Recommendations</div>
+                    </div><b id="homeXP">890 XP</b>
+                </div>
+                <div class="progress" style="margin-top:14px"><span id="homeProgress" style="width:66%"></span></div>
+                <div class="muted" id="homeRemaining" style="margin-top:6px">460 XP to Level 5</div>
+            </div>
+            <h3>Earn XP today</h3>
+            <div class="task">
+                <div class="task-row">
+                    <div>Daily login<div class="muted">Very easy · under 10 min · repeats daily</div>
+                    </div><b>+5</b>
+                </div>
+            </div>
+            <div class="task">
+                <div class="task-row">
+                    <div>Upload your resume<div class="muted">Moderate · 10–30 min · two-step</div>
+                    </div><b>+45</b>
+                </div>
+            </div>
+            <div class="task demo-task" id="assessmentTask">
+                <div class="task-row">
+                    <div><b>Complete employer assessment</b>
+                        <div class="muted">Difficult · 1–3 hrs · employer approval</div>
+                    </div><b>+250</b>
+                </div><button id="assessmentBtn" class="button demo-complete" onclick="completeAssessment()">Demo:
+                    complete activity</button>
+            </div>
+            <div class="task demo-task" id="workshopTask">
+                <div class="task-row">
+                    <div><b>Attend Career Workshop</b>
+                        <div class="muted">Moderate · workshop · educator approval</div>
+                    </div><b>+200</b>
+                </div><button id="workshopBtn" class="button demo-complete" onclick="completeWorkshop()" disabled>Demo:
+                    complete after assessment</button>
+            </div>
+            <div class="mobile-nav">
+                <b>Home</b><span>Learn</span><span>Earn</span><span>Messages</span><span>Profile</span></div>
+        </div>
+
+        <div class="phone">
+            <h2>Learn</h2>
+            <div class="task-row"><span class="pill">Progress</span><span>Subjects</span><span>Challenges</span></div>
+            <div style="text-align:center;margin:38px 0">
+                <div class="muted" id="learnLevel">LEVEL 4</div>
+                <div class="big" id="learnXP">890</div>
+                <div class="muted" id="learnProgressText">of 1350 XP · 66% to Level 5</div>
+            </div>
+            <div class="grid" style="grid-template-columns:repeat(3,1fr);margin:0">
+                <div class="card"><b>12</b>
+                    <div class="muted">Day streak</div>
+                </div>
+                <div class="card"><b id="badgeCount">4</b>
+                    <div class="muted">Badges earned</div>
+                </div>
+                <div class="card"><b>2</b>
+                    <div class="muted">Challenges live</div>
+                </div>
+            </div>
+            <h3>Recent XP</h3>
+            <div id="recentXP">
+                <div class="task-row">
+                    <div>Attended Careers Webinar<div class="muted">Networking · attendance verified</div>
+                    </div><b>+60</b>
+                </div>
+                <hr>
+                <div class="task-row">
+                    <div>Uploaded portfolio<div class="muted">Profile · self-declared</div>
+                    </div><b>+15</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="phone dark">
+            <div class="muted">YOUR LADDER</div>
+            <h2 id="ladderTitle">890 XP · Level 4</h2>
+            <p>Ten levels. Each one opens something real.</p>
+            <div class="task">1 · Student Profile <span class="muted">0 XP · cleared</span></div>
+            <div class="task">2 · Basic Job Applications <span class="muted">100 XP · cleared</span></div>
+            <div class="task">3 · Premium Challenges <span class="muted">350 XP · cleared</span></div>
+            <div class="task" id="level4row" style="outline:2px solid #a257e8">4 · Employer Recommendations<div
+                    class="progress"><span id="ladderProgress" style="width:66%"></span></div><span class="muted"
+                    id="ladderProgressText">890 / 1350 XP</span></div>
+            <div class="task" id="level5row">5 · Advanced Opportunities <span class="muted">1350 XP</span></div>
+            <div class="task">6 · Verified Contributor <span class="muted">2250 XP</span></div>
+            <div class="task">7 · Mentor Eligibility <span class="muted">3550 XP</span></div>
+            <div class="task">8 · Elite Opportunities <span class="muted">5350 XP</span></div>
+            <div class="task">9 · Industry Recognition <span class="muted">7850 XP</span></div>
+            <div class="task">10 · Platform Ambassador <span class="muted">11350 XP</span></div>
+        </div>
+
+        <div class="phone">
+            <h2>Profile</h2>
+            <div class="card"><b>J · Jack Brown</b>
+                <div class="muted">jackbrown@gmail.com</div>
+            </div>
+            <h3>Achievements</h3>
+            <div class="badge-grid">
+                <div class="badge">🏅<br>First Steps<br><span class="muted">Earned</span></div>
+                <div class="badge">🌟<br>Rising Star<br><span class="muted">Earned</span></div>
+                <div class="badge">💼<br>Job Ready<br><span class="muted">Earned</span></div>
+                <div class="badge">🤝<br>Team Player<br><span class="muted">Earned</span></div>
+                <div class="badge locked" id="careerBadge">◻<br>Career Starter<br><span class="muted"
+                        id="careerBadgeText">Complete employer assessment</span></div>
+                <div class="badge">?<br>Hidden<br><span class="muted">Keep going</span></div>
+            </div>
+        </div>
+
+        <div class="phone engine-phone">
+            <h2>XP Engine Trace</h2>
+            <p class="muted">This panel shows what the Python XP Engine would do after Laravel sends a verified Alumable
+                completion event.</p>
+            <div id="engineTrace" class="engine-trace">
+                <div class="trace-line">Waiting for demo activity...</div>
+            </div>
+            <div class="xp-panel" style="margin-top:16px">
+                <div class="muted">CURRENT TOTAL</div>
+                <div class="xp-number" id="traceTotal">890 XP</div>
+                <div id="traceLevel">Level 4</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const LEVELS = [{
+            level: 1,
+            xp: 0,
+            name: 'Student Profile'
+        }, {
+            level: 2,
+            xp: 100,
+            name: 'Basic Job Applications'
+        }, {
+            level: 3,
+            xp: 350,
+            name: 'Premium Challenges'
+        }, {
+            level: 4,
+            xp: 750,
+            name: 'Employer Recommendations'
+        }, {
+            level: 5,
+            xp: 1350,
+            name: 'Advanced Opportunities'
+        }, {
+            level: 6,
+            xp: 2250,
+            name: 'Verified Contributor'
+        }, {
+            level: 7,
+            xp: 3550,
+            name: 'Mentor Eligibility'
+        }, {
+            level: 8,
+            xp: 5350,
+            name: 'Elite Opportunities'
+        }, {
+            level: 9,
+            xp: 7850,
+            name: 'Industry Recognition'
+        }, {
+            level: 10,
+            xp: 11350,
+            name: 'Platform Ambassador'
+        }];
+        let state = {
+            xp: 890,
+            assessment: false,
+            workshop: false,
+            achievement: false,
+            ledger: []
+        };
+
+        function currentLevel() {
+            let l = LEVELS[0];
+            LEVELS.forEach(x => {
+                if (state.xp >= x.xp) l = x
+            });
+            return l;
+        }
+
+        function nextLevel() {
+            const l = currentLevel();
+            return LEVELS.find(x => x.level === l.level + 1) || l;
+        }
+
+        function addTrace(text, kind = '') {
+            const el = document.createElement('div');
+            el.className = 'trace-line ' + kind;
+            el.textContent = text;
+            document.getElementById('engineTrace').prepend(el)
+        }
+
+        function addRecent(name, xp, label) {
+            const row = document.createElement('div');
+            row.innerHTML =
+                `<hr><div class="task-row demo-new"><div>${name}<div class="muted">${label}</div></div><b>+${xp}</b></div>`;
+            document.getElementById('recentXP').prepend(row)
+        }
+
+        function award(amount, type, name) {
+            state.xp += amount;
+            state.ledger.push({
+                amount,
+                type,
+                name
+            });
+            addTrace(`AWARD ${type}: +${amount} XP — ${name}`, 'ok');
+            addRecent(name, amount, type.toLowerCase())
+        }
+
+        function showToast(title, body) {
+            const t = document.getElementById('toast');
+            t.innerHTML = `<b>${title}</b><br>${body}`;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 4500)
+        }
+
+        function render() {
+            const l = currentLevel(),
+                n = nextLevel();
+            const span = n.xp - l.xp || 1;
+            const pct = l.level === 10 ? 100 : Math.max(0, Math.min(100, ((state.xp - l.xp) / span) * 100));
+            const remain = Math.max(0, n.xp - state.xp);
+            document.getElementById('homeXP').textContent = state.xp + ' XP';
+            document.getElementById('homeLevel').textContent = 'Level ' + l.level;
+            document.getElementById('homeUnlock').textContent = l.name;
+            document.getElementById('homeProgress').style.width = pct + '%';
+            document.getElementById('homeRemaining').textContent = l.level === 10 ? 'Final level reached' : remain +
+                ' XP to Level ' + n.level;
+            document.getElementById('learnLevel').textContent = 'LEVEL ' + l.level;
+            document.getElementById('learnXP').textContent = state.xp;
+            document.getElementById('learnProgressText').textContent = l.level === 10 ? 'Final level reached' :
+                `of ${n.xp} XP · ${Math.round(pct)}% to Level ${n.level}`;
+            document.getElementById('ladderTitle').textContent = `${state.xp} XP · Level ${l.level}`;
+            document.getElementById('ladderProgress').style.width = pct + '%';
+            document.getElementById('ladderProgressText').textContent = l.level === 4 ? `${state.xp} / 1350 XP` :
+                `Level ${l.level} reached`;
+            document.getElementById('traceTotal').textContent = state.xp + ' XP';
+            document.getElementById('traceLevel').textContent = 'Level ' + l.level + ' · ' + l.name;
+            document.getElementById('level4row').style.outline = l.level === 4 ? '2px solid #a257e8' : 'none';
+            document.getElementById('level5row').style.outline = l.level === 5 ? '2px solid #a257e8' : 'none';
+            document.getElementById('badgeCount').textContent = state.achievement ? 5 : 4;
+            if (state.achievement) {
+                document.getElementById('careerBadge').classList.remove('locked');
+                document.getElementById('careerBadge').classList.add('earned');
+                document.getElementById('careerBadge').innerHTML =
+                    '🏆<br>Career Starter<br><span class="muted">Earned · +50 XP</span>'
+            }
+        }
+
+        function completeAssessment() {
+            if (state.assessment) return;
+            const before = currentLevel();
+            addTrace('Laravel → verified completion event received');
+            addTrace('Duplicate check → not previously completed');
+            state.assessment = true;
+            award(250, 'ACTIVITY', 'Complete Employer Assessment');
+            addTrace('Achievement check → Career Starter requirements met', 'ok');
+            state.achievement = true;
+            award(50, 'ACHIEVEMENT', 'Career Starter bonus');
+            const after = currentLevel();
+            addTrace(`Total XP recalculated → ${state.xp} XP`);
+            addTrace(`Level threshold check → Level ${after.level}`);
+            document.getElementById('assessmentBtn').textContent = '✓ Completed';
+            document.getElementById('assessmentBtn').disabled = true;
+            document.getElementById('workshopBtn').disabled = false;
+            document.getElementById('workshopBtn').textContent = 'Demo: complete activity';
+            render();
+            showToast('Activity completed', '+250 Activity XP · +50 Achievement XP · Total ' + state.xp + ' XP');
+        }
+
+        function completeWorkshop() {
+            if (state.workshop) return;
+            const before = currentLevel();
+            addTrace('Laravel → second verified completion event received');
+            state.workshop = true;
+            award(200, 'ACTIVITY', 'Attend Career Workshop');
+            const after = currentLevel();
+            addTrace(`Total XP recalculated → ${state.xp} XP`);
+            if (after.level > before.level) {
+                addTrace(`LEVEL UP: Level ${before.level} → Level ${after.level}`, 'levelup');
+                addTrace(`Capability unlocked → ${after.name}`, 'levelup');
+                showToast('Level up! 🎉', `Level ${before.level} → Level ${after.level} · ${after.name} unlocked`)
+            } else {
+                addTrace(`Level threshold check → remains Level ${after.level}`)
+            }
+            document.getElementById('workshopBtn').textContent = '✓ Completed';
+            document.getElementById('workshopBtn').disabled = true;
+            render();
+        }
+
+        function resetDemo() {
+            state = {
+                xp: 890,
+                assessment: false,
+                workshop: false,
+                achievement: false,
+                ledger: []
+            };
+            location.reload()
+        }
+        render();
+    </script>
+</body>
+
+</html>

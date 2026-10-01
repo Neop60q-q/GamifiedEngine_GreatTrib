@@ -1,0 +1,62 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: gamification
+      MYSQL_USER: gamification
+      MYSQL_PASSWORD: gamification
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - gamification_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  db-seed:
+    build: .
+    command: python -m scripts.seed_demo
+    environment:
+      DATABASE_URL: mysql+pymysql://gamification:gamification@mysql:3306/gamification
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  creation-engine:
+    build: .
+    command: uvicorn creation_engine.main:app --host 0.0.0.0 --port 8001
+    environment:
+      DATABASE_URL: mysql+pymysql://gamification:gamification@mysql:3306/gamification
+    ports:
+      - "8001:8001"
+    depends_on:
+      db-seed:
+        condition: service_completed_successfully
+
+  xp-engine:
+    build: .
+    command: uvicorn xp_engine.main:app --host 0.0.0.0 --port 8002
+    environment:
+      DATABASE_URL: mysql+pymysql://gamification:gamification@mysql:3306/gamification
+    ports:
+      - "8002:8002"
+    depends_on:
+      db-seed:
+        condition: service_completed_successfully
+
+  avatar-engine:
+    build: .
+    command: uvicorn avatar_engine.main:app --host 0.0.0.0 --port 8003
+    environment:
+      DATABASE_URL: mysql+pymysql://gamification:gamification@mysql:3306/gamification
+    ports:
+      - "8003:8003"
+    depends_on:
+      db-seed:
+        condition: service_completed_successfully
+
+volumes:
+  gamification_mysql:
