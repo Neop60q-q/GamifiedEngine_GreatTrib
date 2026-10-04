@@ -13,6 +13,8 @@ export type PersistedActivity = {
   description: string;
   category: string;
   final_xp: number;
+  minimum_level: number;
+  repeatability: string;
   status: "Draft" | "Active" | "Inactive";
   created_at: string;
   updated_at: string;
@@ -23,6 +25,18 @@ export type CreateActivityInput = {
   description: string;
   category: string;
 };
+export type XPFactorsInput = {
+  difficulty: string;
+  estimated_time_value: number;
+  estimated_time_unit: string;
+  skill_level: string;
+  effort: string;
+  complexity: string;
+  student_impact: string;
+  verification_method: string;
+  repeatability: string;
+  completion_type: string;
+};
 export type PrototypeActivityInput = {
   creator_external_id: string;
   creator_role: "EDUCATOR" | "EMPLOYER";
@@ -30,20 +44,10 @@ export type PrototypeActivityInput = {
   description: string;
   category: string;
   status: "Draft" | "Active" | "Inactive";
-  factors: {
-    difficulty: string;
-    estimated_time_value: number;
-    estimated_time_unit: string;
-    skill_level: string;
-    effort: string;
-    complexity: string;
-    student_impact: string;
-    verification_method: string;
-    repeatability: string;
-    completion_type: string;
-  };
+  factors: XPFactorsInput;
   skill_allocations: { skill_code: string; percentage: number }[];
   cosmetic_reward_code?: string | null;
+  minimum_level: number;
 };
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/creation-api${path}`, {
@@ -68,6 +72,15 @@ export function createPrototypeActivity(input: PrototypeActivityInput) {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+export function previewActivityXp(factors: XPFactorsInput) {
+  return request<{ calculated_xp: number; xp_rule_version: number }>(
+    "/v1/activities/preview-xp",
+    {
+      method: "POST",
+      body: JSON.stringify(factors),
+    },
+  );
 }
 export function listActivities() {
   return request<PersistedActivity[]>("/v1/activities");

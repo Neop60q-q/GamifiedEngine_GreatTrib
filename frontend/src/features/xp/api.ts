@@ -93,3 +93,32 @@ export function completeActivity(
 export function getStudentProgress(userId = "demo-student-1") {
   return req<StudentProgress>(`/v1/students/${userId}/progress`);
 }
+
+export type StudentActivity = {
+  id: number;
+  external_id: string;
+  creator_external_id: string;
+  creator_role: "EDUCATOR" | "EMPLOYER";
+  title: string;
+  description: string;
+  category: string;
+  final_xp: number;
+  minimum_level: number;
+  repeatability: string;
+  status: "Draft" | "Active" | "Inactive";
+  created_at: string;
+  updated_at: string;
+  student_eligibility: {
+    can_complete: boolean;
+    reason: "LEVEL_REQUIRED" | "ALREADY_COMPLETED" | "COMPLETED_THIS_PERIOD" | null;
+    message: string | null;
+    student_level: number;
+    minimum_level: number;
+    completed_count: number;
+    available_again_label: string | null;
+  };
+};
+
+export function getStudentActivities(userId = "demo-student-1") {
+  return req<StudentActivity[]>(`/v1/students/${userId}/activities`);
+}

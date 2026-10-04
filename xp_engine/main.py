@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from database.connection import get_db
 from database.models import (
+    Activity,
     ActivityCompletion,
     ActivityVersion,
     ActivitySkillAllocation,
@@ -44,6 +46,95 @@ def health():
     return {"status": "ok", "service": "xp-engine"}
 
 
+
+
+def _repeatability_state(activity, previous_completions):
+    """Return whether the activity may be completed now and why."""
+    repeatability = (activity.repeatability or "ONE_TIME").upper()
+    if not previous_completions:
+        return True, None, None
+
+    latest = previous_completions[0].completed_at
+    now = datetime.utcnow()
+
+    if repeatability == "UNLIMITED":
+        return True, None, None
+    if repeatability == "ONE_TIME":
+        return False, "ALREADY_COMPLETED", None
+    if repeatability == "DAILY" and latest.date() == now.date():
+        return False, "COMPLETED_THIS_PERIOD", "Available again tomorrow"
+    if repeatability == "WEEKLY" and latest.isocalendar()[:2] == now.isocalendar()[:2]:
+        return False, "COMPLETED_THIS_PERIOD", "Available again next week"
+    if repeatability == "MONTHLY" and (latest.year, latest.month) == (now.year, now.month):
+        return False, "COMPLETED_THIS_PERIOD", "Available again next month"
+    return True, None, None
+
+
+def _activity_eligibility(db, activity, external_user_id: str):
+    total = awards.total(db, external_user_id)
+    level_rule = progression.level_for(db, total)
+    student_level = level_rule.level if level_rule else 1
+    required_level = activity.minimum_level or 1
+
+    previous = completions.find_for_user_activity(db, external_user_id, activity.id)
+    completed_count = len(previous)
+
+    if student_level < required_level:
+        return {
+            "can_complete": False,
+            "reason": "LEVEL_REQUIRED",
+            "message": f"Level {required_level} required",
+            "student_level": student_level,
+            "minimum_level": required_level,
+            "completed_count": completed_count,
+            "available_again_label": None,
+        }
+
+    repeat_allowed, reason, available_again = _repeatability_state(activity, previous)
+    return {
+        "can_complete": repeat_allowed,
+        "reason": reason,
+        "message": (
+            "Completed" if reason == "ALREADY_COMPLETED" else
+            available_again if reason == "COMPLETED_THIS_PERIOD" else None
+        ),
+        "student_level": student_level,
+        "minimum_level": required_level,
+        "completed_count": completed_count,
+        "available_again_label": available_again,
+    }
+
+
+def _activity_for_student(db, activity, external_user_id: str):
+    return {
+        "id": activity.id,
+        "external_id": activity.external_id,
+        "creator_external_id": activity.creator_external_id,
+        "creator_role": activity.creator_role,
+        "title": activity.title,
+        "description": activity.description,
+        "category": activity.category,
+        "final_xp": activity.final_xp,
+        "minimum_level": activity.minimum_level or 1,
+        "repeatability": activity.repeatability or "ONE_TIME",
+        "status": activity.status,
+        "created_at": activity.created_at,
+        "updated_at": activity.updated_at,
+        "student_eligibility": _activity_eligibility(db, activity, external_user_id),
+    }
+
+
+@app.get("/v1/students/{external_user_id}/activities")
+def get_student_activities(external_user_id: str, db: Session = Depends(get_db)):
+    active = (
+        db.query(Activity)
+        .filter(Activity.status == "Active")
+        .order_by(Activity.created_at.asc(), Activity.id.asc())
+        .all()
+    )
+    return [_activity_for_student(db, activity, external_user_id) for activity in active]
+
+
 @app.post("/v1/completions/activity")
 def complete_activity(event: CompletionEvent, db: Session = Depends(get_db)):
     activity = activities.get_by_external_id(db, event.external_activity_id)
@@ -67,6 +158,12 @@ def complete_activity(event: CompletionEvent, db: Session = Depends(get_db)):
 
     if event.approval_status != "APPROVED":
         return {"status": "awaiting_verification"}
+
+    eligibility = _activity_eligibility(db, activity, event.external_user_id)
+    if not eligibility["can_complete"]:
+        if eligibility["reason"] == "LEVEL_REQUIRED":
+            raise HTTPException(403, eligibility["message"])
+        raise HTTPException(409, eligibility["message"] or "Activity is not currently repeatable")
 
     completion = ActivityCompletion(
         external_user_id=event.external_user_id,

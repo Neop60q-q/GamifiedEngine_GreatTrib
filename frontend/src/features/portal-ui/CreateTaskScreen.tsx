@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { createPrototypeActivity } from "../activity-creation/api";
+import {
+  createPrototypeActivity,
+  previewActivityXp,
+  type XPFactorsInput,
+} from "../activity-creation/api";
 import { factorOptions } from "../activity-creation/model";
 
 type TimeChoice = { label: string; value: number; unit: string };
@@ -49,6 +53,7 @@ export function CreateTaskScreen() {
   const [impact, setImpact] = useState("MODERATE");
   const [verification, setVerification] = useState("EDUCATOR_APPROVAL");
   const [repeatability, setRepeatability] = useState("ONE_TIME");
+  const [minimumLevel, setMinimumLevel] = useState(1);
   const [completionType, setCompletionType] = useState("SUBMISSION");
   const [status, setStatus] = useState<"Draft" | "Active" | "Inactive">(
     "Active",
@@ -61,15 +66,70 @@ export function CreateTaskScreen() {
   const [reward, setReward] = useState("");
   const [saving, setSaving] = useState(false),
     [message, setMessage] = useState("");
-  const [lastXp, setLastXp] = useState<number | null>(null);
+  const [previewXp, setPreviewXp] = useState<number | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(true);
+  const [previewError, setPreviewError] = useState("");
   const selectedTime = timeChoices[timeIndex];
   const allocationTotal = dev + cyber + comm;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setPreviewLoading(true);
+      setPreviewError("");
+
+      const factors: XPFactorsInput = {
+        difficulty,
+        estimated_time_value: selectedTime.value,
+        estimated_time_unit: selectedTime.unit,
+        skill_level: skillLevel,
+        effort,
+        complexity,
+        student_impact: impact,
+        verification_method: verification,
+        repeatability,
+        completion_type: completionType,
+      };
+
+      try {
+        const result = await previewActivityXp(factors);
+        if (!controller.signal.aborted) {
+          setPreviewXp(result.calculated_xp);
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setPreviewXp(null);
+          setPreviewError(
+            err instanceof Error ? err.message : "Could not calculate XP",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setPreviewLoading(false);
+        }
+      }
+    }, 200);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [
+    difficulty,
+    timeIndex,
+    skillLevel,
+    effort,
+    complexity,
+    impact,
+    verification,
+    repeatability,
+    completionType,
+  ]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     setMessage("");
-    setLastXp(null);
     try {
       const activity = await createPrototypeActivity({
         creator_external_id:
@@ -97,8 +157,9 @@ export function CreateTaskScreen() {
           { skill_code: "COMMUNICATION", percentage: comm },
         ].filter((item) => item.percentage > 0),
         cosmetic_reward_code: reward || null,
+        minimum_level: minimumLevel,
       });
-      setLastXp(activity.final_xp);
+      setPreviewXp(activity.final_xp);
       setMessage(
         `Created and ${status === "Active" ? "published" : "saved"}: ${activity.title}`,
       );
@@ -230,6 +291,19 @@ export function CreateTaskScreen() {
               setRepeatability,
               factorOptions.repeatability,
             )}
+            <label>
+              Minimum student level
+              <select
+                value={minimumLevel}
+                onChange={(e) => setMinimumLevel(Number(e.target.value))}
+              >
+                {[1, 2, 3, 4, 5, 6].map((level) => (
+                  <option key={level} value={level}>
+                    Level {level}
+                  </option>
+                ))}
+              </select>
+            </label>
             {select(
               "Completion type",
               completionType,
@@ -313,20 +387,25 @@ export function CreateTaskScreen() {
           <div className="rail-card">
             <small>Recommended XP</small>
             <strong>
-              {lastXp === null ? "—" : lastXp}
+              {previewLoading ? "…" : previewXp === null ? "—" : previewXp}
               <span> XP</span>
             </strong>
             <p>
-              The selected factors are sent to the Python XP Engine. Factor
-              values remain configurable and can be updated later without
-              redesigning this form.
+              Updates live as XP-related factors change. The preview uses the
+              same Python calculation and MySQL rule values used when the
+              activity is published.
             </p>
           </div>
           <label>
             Final XP
             <div className="final-xp-box">
-              {lastXp === null ? "Calculated on publish" : `${lastXp} XP`}
+              {previewLoading
+                ? "Calculating…"
+                : previewXp === null
+                  ? "Unavailable"
+                  : `${previewXp} XP`}
             </div>
+            {previewError && <small className="save-message">{previewError}</small>}
           </label>
           <label>
             Status

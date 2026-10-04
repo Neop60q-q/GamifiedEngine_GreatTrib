@@ -97,4 +97,5 @@ class ActivityPrototypeCreate(BaseModel):
     factors: XPFactors
     skill_allocations: list[SkillAllocationInput] = []
     cosmetic_reward_code: Optional[str] = None
+    minimum_level: int = Field(default=1, ge=1)
     status: Literal["Draft", "Active", "Inactive"] = "Active"

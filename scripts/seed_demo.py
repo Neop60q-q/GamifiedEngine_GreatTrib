@@ -1,6 +1,12 @@
+import json
+
+from sqlalchemy import inspect, text
 from database.connection import SessionLocal, engine
 from database.models import (
     Achievement,
+    Activity,
+    ActivityVersion,
+    ActivitySkillAllocation,
     AchievementCondition,
     Base,
     CosmeticItem,
@@ -87,6 +93,19 @@ LEVELS = [
 
 def seed():
     Base.metadata.create_all(bind=engine)
+
+    # create_all does not alter an existing MySQL table. Keep older prototype
+    # databases compatible by adding the new activity gate when it is missing.
+    activity_columns = {c["name"] for c in inspect(engine).get_columns("activities")}
+    if "minimum_level" not in activity_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "ALTER TABLE activities "
+                    "ADD COLUMN minimum_level INT NOT NULL DEFAULT 1"
+                )
+            )
+
     db = SessionLocal()
 
     try:
@@ -158,6 +177,138 @@ def seed():
         ]:
             if db.query(Skill).filter(Skill.code == code).first() is None:
                 db.add(Skill(code=code, name=name, status="Active"))
+        db.commit()
+
+        # Predefined activities make the prototype immediately demonstrable.
+        # Their XP values deliberately line up with the configured level thresholds
+        # so a fresh demo student can unlock the next gated activity in sequence.
+        demo_activities = [
+            {
+                "external_id": "demo-daily-login",
+                "title": "Daily Login",
+                "description": "Return to Alumable and check your student dashboard.",
+                "category": "Profile",
+                "minimum_level": 1,
+                "repeatability": "DAILY",
+                "final_xp": 5,
+                "difficulty": "VERY_EASY",
+                "skills": {"CAREER_READINESS": 100},
+            },
+            {
+                "external_id": "demo-upload-resume",
+                "title": "Upload Your Resume",
+                "description": "Upload a current resume to build your Alumable profile.",
+                "category": "Profile",
+                "minimum_level": 1,
+                "repeatability": "ONE_TIME",
+                "final_xp": 100,
+                "difficulty": "EASY",
+                "skills": {"CAREER_READINESS": 80, "COMMUNICATION": 20},
+            },
+            {
+                "external_id": "demo-career-workshop",
+                "title": "Attend Career Workshop",
+                "description": "Attend a career workshop and submit your workshop notes.",
+                "category": "Learning",
+                "minimum_level": 2,
+                "repeatability": "ONE_TIME",
+                "final_xp": 250,
+                "difficulty": "MODERATE",
+                "skills": {"CAREER_READINESS": 60, "COMMUNICATION": 40},
+            },
+            {
+                "external_id": "demo-development-challenge",
+                "title": "Software Development Challenge",
+                "description": "Complete a practical development task and submit your solution.",
+                "category": "Learning",
+                "minimum_level": 3,
+                "repeatability": "ONE_TIME",
+                "final_xp": 400,
+                "difficulty": "DIFFICULT",
+                "skills": {"SOFTWARE_DEVELOPMENT": 80, "COMMUNICATION": 20},
+            },
+            {
+                "external_id": "activity-employer-assessment",
+                "title": "Complete Employer Assessment",
+                "description": "Complete a cybersecurity scenario reviewed by an employer.",
+                "category": "Employment",
+                "minimum_level": 4,
+                "repeatability": "ONE_TIME",
+                "final_xp": 600,
+                "difficulty": "DIFFICULT",
+                "skills": {"CYBERSECURITY": 80, "COMMUNICATION": 20},
+            },
+            {
+                "external_id": "demo-industry-project",
+                "title": "Industry Project Challenge",
+                "description": "Complete an advanced industry project and present your outcome.",
+                "category": "Employment",
+                "minimum_level": 5,
+                "repeatability": "ONE_TIME",
+                "final_xp": 900,
+                "difficulty": "EXPERT",
+                "skills": {"SOFTWARE_DEVELOPMENT": 50, "CYBERSECURITY": 30, "COMMUNICATION": 20},
+            },
+        ]
+
+        for spec in demo_activities:
+            activity = (
+                db.query(Activity)
+                .filter(Activity.external_id == spec["external_id"])
+                .first()
+            )
+            if activity is None:
+                activity = Activity(
+                    external_id=spec["external_id"],
+                    source_system="ALUMABLE",
+                    creator_external_id="demo-alumable",
+                    creator_role="EDUCATOR",
+                    title=spec["title"],
+                    description=spec["description"],
+                    category=spec["category"],
+                    difficulty=spec["difficulty"],
+                    estimated_time_value=30,
+                    estimated_time_unit="MINUTES",
+                    skill_level="BEGINNER",
+                    effort="MODERATE",
+                    complexity="SINGLE_STEP",
+                    student_impact="MODERATE",
+                    verification_method="SELF_DECLARATION",
+                    repeatability=spec["repeatability"],
+                    completion_type="COMPLETION",
+                    minimum_level=spec["minimum_level"],
+                    final_xp=spec["final_xp"],
+                    xp_rule_version=1,
+                    version=1,
+                    status="Active",
+                )
+                db.add(activity)
+                db.flush()
+                db.add(
+                    ActivityVersion(
+                        activity_id=activity.id,
+                        version=1,
+                        final_xp=activity.final_xp,
+                        xp_rule_version=1,
+                        snapshot_json=json.dumps({
+                            "seeded_demo": True,
+                            "minimum_level": activity.minimum_level,
+                            "repeatability": activity.repeatability,
+                        }),
+                    )
+                )
+
+                for skill_code, percentage in spec["skills"].items():
+                    skill = db.query(Skill).filter(Skill.code == skill_code).first()
+                    if skill:
+                        db.add(
+                            ActivitySkillAllocation(
+                                activity_id=activity.id,
+                                skill_id=skill.id,
+                                percentage=percentage,
+                            )
+                        )
+        db.commit()
 
         cosmetic_specs = [
             (

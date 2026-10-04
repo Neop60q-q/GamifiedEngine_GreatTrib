@@ -87,7 +87,7 @@ export function ProfileScreen({
               <p>XP earned across your skill areas.</p>
             </div>
             {progress?.skills?.length ? (
-              progress.skills.map((s, i) => {
+              progress.skills.map((s) => {
                 const pct = Math.min(100, (s.total_xp / 500) * 100);
                 return (
                   <div className="skill-detail" key={s.skill_code}>

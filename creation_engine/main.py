@@ -16,7 +16,7 @@ from database.models import (
 from repositories.activity_repository import ActivityRepository
 from services.xp_calculator import XPCalculator
 from shared.config import settings
-from shared.models import ActivityMVPCreate, ActivityPrototypeCreate
+from shared.models import ActivityMVPCreate, ActivityPrototypeCreate, XPFactors
 
 app = FastAPI(title="Alumable Creation Engine v6", version="0.7.0")
 app.add_middleware(
@@ -55,6 +55,8 @@ def activity_response(activity, db):
         "description": activity.description,
         "category": activity.category,
         "final_xp": activity.final_xp,
+        "minimum_level": activity.minimum_level,
+        "repeatability": activity.repeatability or "ONE_TIME",
         "status": activity.status,
         "created_at": activity.created_at,
         "updated_at": activity.updated_at,
@@ -92,6 +94,7 @@ def persist(payload, db):
         verification_method=payload.factors.verification_method,
         repeatability=payload.factors.repeatability,
         completion_type=payload.factors.completion_type,
+        minimum_level=payload.minimum_level,
         final_xp=final_xp,
         xp_rule_version=rule_version,
         version=1,
@@ -149,6 +152,13 @@ def persist(payload, db):
         db.rollback()
         raise HTTPException(500, "Could not save activity") from exc
     return activity_response(activity, db)
+
+
+@app.post("/v1/activities/preview-xp")
+def preview_activity_xp(payload: XPFactors, db: Session = Depends(get_db)):
+    """Calculate XP from the current form factors without creating an activity."""
+    final_xp, rule_version = calculator.calculate(db, payload)
+    return {"calculated_xp": final_xp, "xp_rule_version": rule_version}
 
 
 @app.post("/v1/activities/prototype")

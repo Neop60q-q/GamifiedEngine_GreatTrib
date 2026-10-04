@@ -30,11 +30,13 @@ export function StudentExperience() {
 
   if (screen === "complete" && completion) {
     return (
-      <CompleteScreen
-        completion={completion}
-        onViewProgress={() => openLearn("progress")}
-        onFindAnother={() => openLearn("challenges")}
-      />
+      <StudentShell screen={screen} onNavigate={setScreen} hideNavigation>
+        <CompleteScreen
+          completion={completion}
+          onViewProgress={() => openLearn("progress")}
+          onFindAnother={() => openLearn("challenges")}
+        />
+      </StudentShell>
     );
   }
 

@@ -46,6 +46,9 @@ class Activity(Base):
     repeatability = Column(String(50), nullable=True)
     completion_type = Column(String(50), nullable=True)
 
+    # Minimum Alumable level required before a student can complete the activity.
+    minimum_level = Column(Integer, nullable=False, default=1)
+
     final_xp = Column(Integer, nullable=False, default=0)
     xp_rule_version = Column(Integer, nullable=False, default=1)
     version = Column(Integer, nullable=False, default=1)

@@ -71,10 +71,12 @@ export function StudentShell({
   screen,
   onNavigate,
   children,
+  hideNavigation = false,
 }: {
   screen: ScreenName;
   onNavigate: (s: ScreenName) => void;
   children: ReactNode;
+  hideNavigation?: boolean;
 }) {
   const nav: [ScreenName, string, string][] = [
     ["dashboard", "home", "Home"],
@@ -87,20 +89,22 @@ export function StudentShell({
     <div className="student-stage">
       <div className="student-ui-shell">
         <main className="student-screen">{children}</main>
-        <nav className="student-bottom">
-          {nav.map(([id, icon, label]) => (
-            <button
-              key={id}
-              className={screen === id ? "active" : ""}
-              onClick={() => onNavigate(id)}
-            >
-              <span className="nav-pill">
-                <Icon>{icon}</Icon>
-              </span>
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
+        {!hideNavigation && (
+          <nav className="student-bottom">
+            {nav.map(([id, icon, label]) => (
+              <button
+                key={id}
+                className={screen === id ? "active" : ""}
+                onClick={() => onNavigate(id)}
+              >
+                <span className="nav-pill">
+                  <Icon>{icon}</Icon>
+                </span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
     </div>
   );
