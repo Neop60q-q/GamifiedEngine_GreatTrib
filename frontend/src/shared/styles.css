@@ -1145,7 +1145,6 @@ dialog::backdrop {
   }
 }
 
-
 /* === HTML DESIGN-SYSTEM ALIGNMENT (t3 portal + t4 student) === */
 :root {
   --al-purple: #9a76be;
@@ -1506,7 +1505,6 @@ dialog::backdrop {
   margin: 18px 0;
 }
 
-
 /* Three-view prototype home */
 .prototype-home {
   min-height: 100vh;
@@ -1819,7 +1817,6 @@ dialog::backdrop {
     grid-column: auto;
   }
 }
-
 
 /* =========================================================
    STUDENT SHELL
@@ -2715,7 +2712,6 @@ dialog::backdrop {
   color: #1c1b1f;
 }
 
-
 .complete-hero {
   text-align: center;
   padding: 40px 24px 32px;
@@ -2826,7 +2822,6 @@ dialog::backdrop {
   background: #9a76be;
   color: #fff;
 }
-
 
 .round-icon,
 .filter-icon {

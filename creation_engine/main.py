@@ -75,7 +75,8 @@ def activity_response(activity, db):
 def persist(payload, db):
     final_xp, rule_version = calculator.calculate(db, payload.factors)
     if sum(x.percentage for x in payload.skill_allocations) > 100:
-        raise HTTPException(422, "Skill allocation percentages cannot exceed 100%")
+        raise HTTPException(
+            422, "Skill allocation percentages cannot exceed 100%")
     activity = Activity(
         external_id=f"demo-activity-{uuid4().hex}",
         source_system=settings.SOURCE_SYSTEM,

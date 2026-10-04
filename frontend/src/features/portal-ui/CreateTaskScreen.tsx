@@ -405,7 +405,9 @@ export function CreateTaskScreen() {
                   ? "Unavailable"
                   : `${previewXp} XP`}
             </div>
-            {previewError && <small className="save-message">{previewError}</small>}
+            {previewError && (
+              <small className="save-message">{previewError}</small>
+            )}
           </label>
           <label>
             Status

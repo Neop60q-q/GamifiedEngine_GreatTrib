@@ -199,7 +199,8 @@ class StudentAchievement(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     external_user_id = Column(String(255), nullable=False, index=True)
-    achievement_id = Column(Integer, ForeignKey("achievements.id"), nullable=False)
+    achievement_id = Column(Integer, ForeignKey(
+        "achievements.id"), nullable=False)
     achievement_version = Column(Integer, nullable=False)
     bonus_xp_at_award = Column(Integer, nullable=False, default=0)
     awarded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -243,7 +244,8 @@ class StudentInventory(Base):
     granted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (
-        UniqueConstraint("external_user_id", "item_id", name="uq_student_cosmetic"),
+        UniqueConstraint("external_user_id", "item_id",
+                         name="uq_student_cosmetic"),
     )
 
 
@@ -274,7 +276,8 @@ class ActivitySkillAllocation(Base):
     activity_id = Column(
         Integer, ForeignKey("activities.id"), nullable=False, index=True
     )
-    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"),
+                      nullable=False, index=True)
     percentage = Column(Integer, nullable=False)
     __table_args__ = (
         UniqueConstraint("activity_id", "skill_id", name="uq_activity_skill"),
@@ -285,7 +288,8 @@ class SkillXPTransaction(Base):
     __tablename__ = "skill_xp_transactions"
     id = Column(Integer, primary_key=True, autoincrement=True)
     external_user_id = Column(String(255), nullable=False, index=True)
-    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"),
+                      nullable=False, index=True)
     amount = Column(Integer, nullable=False)
     source_completion_id = Column(Integer, nullable=False)
     idempotency_key = Column(String(255), nullable=False, unique=True)
