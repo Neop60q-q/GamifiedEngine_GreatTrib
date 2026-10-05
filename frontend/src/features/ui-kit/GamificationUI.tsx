@@ -5,6 +5,7 @@ export type ScreenName =
   | "learn"
   | "earn"
   | "messages"
+  | "avatar"
   | "profile"
   | "complete";
 
@@ -83,6 +84,7 @@ export function StudentShell({
     ["learn", "school", "Learn"],
     ["earn", "work", "Earn"],
     ["messages", "chat_bubble", "Messages"],
+    ["avatar", "accessibility_new", "Avatar"],
     ["profile", "person", "Profile"],
   ];
   return (

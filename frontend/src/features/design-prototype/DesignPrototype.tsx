@@ -11,14 +11,14 @@ export function DesignPrototype() {
             integrations.
           </p>
         </div>
-        <a
+        {/* <a
           className="prototype-open-button"
           href="/prototype/alumable-gamification.html"
           target="_blank"
           rel="noreferrer"
         >
           Open full prototype
-        </a>
+        </a> */}
       </div>
       <iframe
         className="design-prototype-frame"

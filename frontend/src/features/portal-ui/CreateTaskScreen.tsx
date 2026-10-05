@@ -374,9 +374,15 @@ export function CreateTaskScreen() {
                 onChange={(e) => setReward(e.target.value)}
               >
                 <option value="">No cosmetic reward</option>
-                <option value="SECURITY_HOODIE">Security Hoodie</option>
-                <option value="CAREER_BLAZER">Career Blazer</option>
-                <option value="GOLD_JACKET">Gold Jacket</option>
+                <option value="SECURITY_HOODIE">
+                  Security Hoodie · Uncommon
+                </option>
+                <option value="CAREER_BLAZER">
+                  Career Blazer · Uncommon
+                </option>
+                <option value="GOLD_JACKET">
+                  Gold Jacket · Rare
+                </option>
               </select>
             </label>
           </details>
@@ -405,9 +411,7 @@ export function CreateTaskScreen() {
                   ? "Unavailable"
                   : `${previewXp} XP`}
             </div>
-            {previewError && (
-              <small className="save-message">{previewError}</small>
-            )}
+            {previewError && <small className="save-message">{previewError}</small>}
           </label>
           <label>
             Status

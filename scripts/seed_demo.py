@@ -15,6 +15,7 @@ from database.models import (
     XPRuleSet,
     XPRuleValue,
     Skill,
+    StudentInventory,
 )
 
 XP_VALUES = {
@@ -312,6 +313,20 @@ def seed():
 
         cosmetic_specs = [
             (
+                "STARTER_TEE",
+                "Alumable Starter Tee",
+                "outfit",
+                "avatars/outfits/starter_tee_v1",
+                "Common",
+            ),
+            (
+                "STARTER_PURPLE_HOODIE",
+                "Purple Campus Hoodie",
+                "outfit",
+                "avatars/outfits/starter_purple_hoodie_v1",
+                "Common",
+            ),
+            (
                 "SECURITY_HOODIE",
                 "Security Hoodie",
                 "outfit",
@@ -339,6 +354,13 @@ def seed():
                 "avatars/outfits/gold_jacket_v1",
                 "Rare",
             ),
+            (
+                "ALUMABLE_VARSITY_JACKET",
+                "Alumable Varsity Jacket",
+                "outfit",
+                "avatars/outfits/alumable_varsity_jacket_v1",
+                "Rare",
+            ),
         ]
 
         items = {}
@@ -356,10 +378,44 @@ def seed():
 
             items[code] = item
 
-        reward_specs = [
+        # Give the demo student only the two basic cosmetics. The showcase
+        # cosmetics remain locked until they are earned through created tasks.
+        for starter_code in ("STARTER_TEE", "STARTER_PURPLE_HOODIE"):
+            starter = items[starter_code]
+            owned = (
+                db.query(StudentInventory)
+                .filter(
+                    StudentInventory.external_user_id == "demo-student-1",
+                    StudentInventory.item_id == starter.id,
+                )
+                .first()
+            )
+            if owned is None:
+                db.add(
+                    StudentInventory(
+                        external_user_id="demo-student-1",
+                        item_id=starter.id,
+                        reward_event_id=f"demo-starter-{starter_code.lower()}",
+                    )
+                )
+        db.commit()
+
+        # Keep the three showcase outfits free from predefined reward rules.
+        # This lets the Portal-created task be the action that unlocks them.
+        predefined_showcase_rules = [
             (items["CAREER_BLAZER"].id, "ACTIVITY", "activity-employer-assessment"),
-            (items["CAREER_STAR_PIN"].id, "ACHIEVEMENT", "CAREER_STARTER"),
             (items["GOLD_JACKET"].id, "LEVEL", "LEVEL_5"),
+        ]
+        for item_id, source_type, source_code in predefined_showcase_rules:
+            db.query(CosmeticRewardRule).filter(
+                CosmeticRewardRule.item_id == item_id,
+                CosmeticRewardRule.source_type == source_type,
+                CosmeticRewardRule.source_code == source_code,
+            ).delete(synchronize_session=False)
+        db.commit()
+
+        reward_specs = [
+            (items["CAREER_STAR_PIN"].id, "ACHIEVEMENT", "CAREER_STARTER"),
         ]
 
         for item_id, source_type, source_code in reward_specs:

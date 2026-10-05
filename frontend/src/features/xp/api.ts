@@ -110,11 +110,7 @@ export type StudentActivity = {
   updated_at: string;
   student_eligibility: {
     can_complete: boolean;
-    reason:
-      | "LEVEL_REQUIRED"
-      | "ALREADY_COMPLETED"
-      | "COMPLETED_THIS_PERIOD"
-      | null;
+    reason: "LEVEL_REQUIRED" | "ALREADY_COMPLETED" | "COMPLETED_THIS_PERIOD" | null;
     message: string | null;
     student_level: number;
     minimum_level: number;

@@ -6,6 +6,8 @@ import { ProfileScreen } from "./ProfileScreen";
 import { MessagesScreen } from "./MessagesScreen";
 import { EarnScreen } from "./EarnScreen";
 import { CompleteScreen } from "./CompleteScreen";
+import { AvatarScreen } from "./AvatarScreen";
+import { HubScreen } from "./HubScreen";
 import type { CompletionResult } from "../xp/api";
 import type { PersistedActivity } from "../activity-creation/api";
 
@@ -19,6 +21,7 @@ export function StudentExperience() {
   const [learnTab, setLearnTab] = useState<LearnTab>("progress");
   const [progressVersion, setProgressVersion] = useState(0);
   const [completion, setCompletion] = useState<CompletionView | null>(null);
+  const [hubOpen, setHubOpen] = useState(false);
 
   function refreshProgress() {
     setProgressVersion((v) => v + 1);
@@ -26,6 +29,14 @@ export function StudentExperience() {
   function openLearn(tab: LearnTab) {
     setLearnTab(tab);
     setScreen("learn");
+  }
+
+  if (hubOpen) {
+    return (
+      <StudentShell screen="avatar" onNavigate={setScreen} hideNavigation>
+        <HubScreen onBack={() => setHubOpen(false)} />
+      </StudentShell>
+    );
   }
 
   if (screen === "complete" && completion) {
@@ -62,6 +73,7 @@ export function StudentExperience() {
     ),
     earn: <EarnScreen />,
     messages: <MessagesScreen />,
+    avatar: <AvatarScreen onEnterHub={() => setHubOpen(true)} />,
     profile: <ProfileScreen progressVersion={progressVersion} />,
     complete: null,
   } satisfies Record<ScreenName, ReactNode>;
